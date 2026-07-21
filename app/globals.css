@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+:root {
+  --bg-app: #0a0714;
+  --bg-sidebar-1: #050308;
+  --bg-sidebar-2: #241a5e;
+  --bg-sidebar-3: #4b3bef;
+  --bg-card: #150f28;
+  --bg-card-2: #1a1330;
+  --border: #2a2247;
+  --text-primary: #f5f3ff;
+  --text-secondary: #a79fc7;
+  --text-muted: #736b94;
+  --accent-1: #6c4cf5;
+  --accent-2: #4361ff;
+  --success: #22c55e;
+  --danger: #f43f5e;
+  --warning: #f5a623;
+  --ml-color: #ffe600;
+  --shopee-color: #ee4d2d;
+  --tiktok-color: #25f4ee;
+}
+
+@theme inline {
+  --color-app: var(--bg-app);
+  --color-sidebar-1: var(--bg-sidebar-1);
+  --color-sidebar-2: var(--bg-sidebar-2);
+  --color-sidebar-3: var(--bg-sidebar-3);
+  --color-card: var(--bg-card);
+  --color-card-2: var(--bg-card-2);
+  --color-border: var(--border);
+  --color-ink: var(--text-primary);
+  --color-ink-secondary: var(--text-secondary);
+  --color-ink-muted: var(--text-muted);
+  --color-accent: var(--accent-1);
+  --color-accent-2: var(--accent-2);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+  --color-ml: var(--ml-color);
+  --color-shopee: var(--shopee-color);
+  --color-tiktok: var(--tiktok-color);
+  --font-sans: var(--font-inter);
+}
+
+body {
+  background: var(--bg-app);
+  color: var(--text-primary);
+  font-family:
+    var(--font-inter),
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  font-size: 14px;
+}
+
+.bg-accent-gradient {
+  background: linear-gradient(135deg, #7c5cff 0%, #4361ff 100%);
+}
+
+.bg-sidebar-gradient {
+  background: linear-gradient(
+    200deg,
+    var(--bg-sidebar-3) -10%,
+    var(--bg-sidebar-2) 45%,
+    var(--bg-sidebar-1) 90%
+  );
+}
+
+.shadow-accent {
+  box-shadow: 0 6px 16px rgba(99, 72, 245, 0.35);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #2a2247;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
