@@ -11,6 +11,7 @@ import {
 import { FeaturesGrid } from "@/components/landing/features-grid";
 import { QuoteSection } from "@/components/landing/quote-section";
 import { Logo } from "@/components/ui/logo";
+import { GalaxyBackground } from "@/components/ui/galaxy-background";
 
 const STEPS = [
   {
@@ -32,21 +33,12 @@ const STEPS = [
 
 export default function LandingPage() {
   return (
-    <div className="relative overflow-hidden">
+    <div className="bg-app relative overflow-hidden">
+      <GalaxyBackground fixed />
       <LandingNavbar />
 
       {/* HERO */}
       <section className="relative px-6 pb-16 pt-20">
-        <div
-          className="animate-blob bg-accent-gradient absolute -top-20 left-[-10%] h-80 w-80 rounded-full opacity-20 blur-3xl"
-          aria-hidden
-        />
-        <div
-          className="animate-blob absolute right-[-5%] top-40 h-72 w-72 rounded-full bg-[#4361ff] opacity-15 blur-3xl"
-          style={{ animationDelay: "3s" }}
-          aria-hidden
-        />
-
         <div className="relative mx-auto grid max-w-6xl items-center gap-16 md:grid-cols-2">
           <div className="animate-fade-in-up">
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3.5 py-1.5 text-[11.5px] font-semibold text-ink-secondary">

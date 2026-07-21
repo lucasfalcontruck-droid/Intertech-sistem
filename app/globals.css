@@ -125,12 +125,13 @@ body {
   }
 }
 
-@keyframes dash-draw {
-  from {
-    stroke-dashoffset: 40;
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: var(--twinkle-min, 0.15);
   }
-  to {
-    stroke-dashoffset: 0;
+  50% {
+    opacity: var(--twinkle-max, 0.9);
   }
 }
 
@@ -144,4 +145,8 @@ body {
 
 .animate-fade-in-up {
   animation: fade-in-up 0.7s ease-out both;
+}
+
+.animate-twinkle {
+  animation: twinkle 3s ease-in-out infinite;
 }

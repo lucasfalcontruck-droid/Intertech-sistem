@@ -1,12 +1,15 @@
 import { Suspense } from "react";
 import { LoginForm } from "@/components/auth/login-form";
 import { Logo } from "@/components/ui/logo";
+import { GalaxyBackground } from "@/components/ui/galaxy-background";
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen">
-      <div className="bg-sidebar-gradient hidden w-1/2 flex-col justify-between p-12 lg:flex">
-        <Logo />
+    <div className="bg-app relative flex min-h-screen overflow-hidden">
+      <GalaxyBackground />
+
+      <div className="relative z-10 hidden w-1/2 flex-col justify-between p-12 lg:flex">
+        <Logo height={30} />
         <div>
           <h2 className="max-w-md text-3xl font-extrabold leading-tight text-white">
             Gestão completa dos seus canais de venda em um só lugar.
@@ -18,10 +21,10 @@ export default function LoginPage() {
         <div className="text-xs text-white/40">© {new Date().getFullYear()} Intertech</div>
       </div>
 
-      <div className="flex flex-1 items-center justify-center bg-app px-6">
+      <div className="relative z-10 flex flex-1 items-center justify-center px-6">
         <div className="w-full max-w-sm">
           <div className="mb-8 flex justify-center lg:hidden">
-            <Logo />
+            <Logo height={30} />
           </div>
           <div className="rounded-2xl border border-border bg-card p-8">
             <h1 className="text-xl font-bold text-ink">Entrar</h1>
