@@ -1,31 +1,16 @@
 import Link from "next/link";
 import { LandingNavbar } from "@/components/landing/landing-navbar";
 import { HeroVisual } from "@/components/landing/hero-visual";
+import { StatsBar } from "@/components/landing/stats-bar";
+import { FeatureShowcase } from "@/components/landing/feature-showcase";
+import {
+  MarketplaceMockup,
+  FinanceiroMockup,
+  EstoqueMockup,
+} from "@/components/landing/feature-mockups";
+import { FeaturesGrid } from "@/components/landing/features-grid";
+import { QuoteSection } from "@/components/landing/quote-section";
 import { Logo } from "@/components/ui/logo";
-import { IconDashboard, IconMarketplace, IconBox, IconFinanceiro } from "@/components/ui/icons";
-
-const MODULES = [
-  {
-    icon: IconDashboard,
-    title: "Dashboard",
-    description: "Vendas, pedidos e estoque de todos os canais em uma visão só.",
-  },
-  {
-    icon: IconMarketplace,
-    title: "Marketplace",
-    description: "Mercado Livre, Shopee e TikTok Shop conectados e sincronizados.",
-  },
-  {
-    icon: IconBox,
-    title: "Estoque",
-    description: "Controle de produtos, níveis mínimos e alertas de reposição.",
-  },
-  {
-    icon: IconFinanceiro,
-    title: "Financeiro",
-    description: "Fluxo de caixa, contas a pagar/receber e DRE simplificado.",
-  },
-];
 
 const STEPS = [
   {
@@ -51,7 +36,7 @@ export default function LandingPage() {
       <LandingNavbar />
 
       {/* HERO */}
-      <section className="relative px-6 pb-24 pt-20">
+      <section className="relative px-6 pb-16 pt-20">
         <div
           className="animate-blob bg-accent-gradient absolute -top-20 left-[-10%] h-80 w-80 rounded-full opacity-20 blur-3xl"
           aria-hidden
@@ -88,7 +73,7 @@ export default function LandingPage() {
                 href="#modulos"
                 className="text-sm font-semibold text-ink-secondary transition-colors hover:text-ink"
               >
-                Ver módulos
+                Ver recursos
               </a>
             </div>
           </div>
@@ -99,40 +84,47 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* MODULES */}
-      <section id="modulos" className="relative px-6 py-20">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-12 text-center">
-            <h2 className="text-2xl font-extrabold text-ink sm:text-3xl">
-              Tudo que a operação precisa
-            </h2>
-            <p className="mt-3 text-[14.5px] text-ink-secondary">
-              Quatro módulos, um único sistema.
-            </p>
-          </div>
+      <StatsBar />
 
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {MODULES.map((mod, i) => {
-              const Icon = mod.icon;
-              return (
-                <div
-                  key={mod.title}
-                  className="animate-fade-in-up rounded-2xl border border-border bg-card p-6"
-                  style={{ animationDelay: `${0.1 * i}s` }}
-                >
-                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-accent/15 text-[#a68bff]">
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <h3 className="text-[15px] font-bold text-ink">{mod.title}</h3>
-                  <p className="mt-2 text-[13px] leading-relaxed text-ink-secondary">
-                    {mod.description}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+      <FeatureShowcase
+        id="modulos"
+        eyebrow="Marketplace"
+        title="Centralize seus"
+        highlight="canais de venda"
+        bullets={[
+          "Mercado Livre, Shopee e TikTok Shop conectados em um único painel",
+          "Sincronize pedidos e estoque com um clique",
+          "Acompanhe taxas, repasses e ticket médio por canal",
+        ]}
+        visual={<MarketplaceMockup />}
+      />
+
+      <FeatureShowcase
+        eyebrow="Financeiro"
+        title="Controle total do seu"
+        highlight="financeiro"
+        bullets={[
+          "Fluxo de caixa consolidado dos últimos 6 meses",
+          "Contas a pagar e a receber sempre organizadas",
+          "DRE simplificado calculado automaticamente",
+        ]}
+        visual={<FinanceiroMockup />}
+        reverse
+      />
+
+      <FeatureShowcase
+        eyebrow="Estoque"
+        title="Nunca mais fique"
+        highlight="sem estoque"
+        bullets={[
+          "Alertas automáticos de estoque baixo e esgotado",
+          "Canais vinculados por produto, visíveis em um clique",
+          "Ajuste de quantidades direto pelo sistema",
+        ]}
+        visual={<EstoqueMockup />}
+      />
+
+      <FeaturesGrid />
 
       {/* HOW IT WORKS */}
       <section id="como-funciona" className="relative px-6 py-20">
@@ -160,6 +152,8 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      <QuoteSection />
 
       {/* CTA / CONTACT */}
       <section id="contato" className="relative px-6 py-20">
