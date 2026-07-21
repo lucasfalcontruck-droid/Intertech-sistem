@@ -1,9 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import type { Platform } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { PLATFORM_COLOR, PLATFORM_LABEL, PLATFORM_SHORT } from "@/components/ui/platform-chip";
-import { IconRefresh, IconSettings } from "@/components/ui/icons";
+import { IconRefresh, IconSettings, IconCheck } from "@/components/ui/icons";
 import { formatCurrency, formatNumber, formatPercent } from "@/lib/utils";
 import type { IntegrationCard as IntegrationCardData } from "@/lib/types";
 
@@ -21,10 +22,16 @@ export function IntegrationCard({
   data,
   onSync,
   syncing,
+  configureHref,
+  onTest,
+  testing,
 }: {
   data: IntegrationCardData;
   onSync: () => void;
   syncing: boolean;
+  configureHref?: string;
+  onTest?: () => void;
+  testing?: boolean;
 }) {
   return (
     <div className="relative rounded-2xl border border-border bg-card p-5">
@@ -73,11 +80,28 @@ export function IntegrationCard({
           <IconRefresh className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
           {syncing ? "Sincronizando..." : "Sincronizar"}
         </Button>
-        <Button variant="sync">
-          <IconSettings className="h-3.5 w-3.5" />
-          Configurar
-        </Button>
+        {configureHref ? (
+          <Link
+            href={configureHref}
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-[10px] border border-border bg-white/6 px-4 py-2.5 text-[13px] font-semibold text-ink hover:bg-white/10"
+          >
+            <IconSettings className="h-3.5 w-3.5" />
+            Configurar
+          </Link>
+        ) : (
+          <Button variant="sync">
+            <IconSettings className="h-3.5 w-3.5" />
+            Configurar
+          </Button>
+        )}
       </div>
+
+      {onTest && (
+        <Button variant="secondary" onClick={onTest} disabled={testing} className="mt-2 w-full">
+          <IconCheck className="h-3.5 w-3.5" />
+          {testing ? "Testando..." : "Testar conexão real"}
+        </Button>
+      )}
     </div>
   );
 }

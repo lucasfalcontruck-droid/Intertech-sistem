@@ -125,6 +125,24 @@ Acesse [http://localhost:3000](http://localhost:3000) — você será redirecion
 
 `lib/marketplace/` define uma interface (`MarketplaceAdapter`) com `getSales()`, `getOrders()` e `syncInventory()`, hoje implementada sobre os dados seedados no banco (`SeedBackedMarketplaceAdapter`). Para integrar com as APIs reais do Mercado Livre, Shopee e TikTok Shop no futuro, basta criar uma nova implementação dessa interface por plataforma — nenhuma tela ou rota precisa mudar.
 
+### Conexão real com o Mercado Livre (OAuth)
+
+Já existe um fluxo OAuth2 completo para conectar a conta real do Mercado Livre (independente do adapter mock acima):
+
+1. Crie uma aplicação em [developers.mercadolivre.com.br/devcenter](https://developers.mercadolivre.com.br/devcenter) com **Redirect URI** = `http://localhost:3000/api/marketplace/mercadolivre/callback` e escopos `read` + `offline_access`.
+2. Preencha no `.env`:
+   ```
+   MERCADOLIVRE_CLIENT_ID="..."
+   MERCADOLIVRE_CLIENT_SECRET="..."
+   MERCADOLIVRE_REDIRECT_URI="http://localhost:3000/api/marketplace/mercadolivre/callback"
+   ```
+3. Na tela **Marketplace**, clique em "Configurar" no card do Mercado Livre — você será redirecionado para autorizar o app na sua conta real.
+4. Depois de autorizar, use "Testar conexão real" para confirmar (busca seus dados reais de usuário e os últimos pedidos via `GET /api/marketplace/mercadolivre/test`).
+
+Implementação em `lib/marketplace/mercadolivre-client.ts` (chamadas à API real), `lib/marketplace/mercadolivre-auth.ts` (renovação automática de token) e `app/api/marketplace/mercadolivre/*` (rotas de connect/callback/test). Os tokens ficam salvos em `PlatformIntegration.credentials`.
+
+Isso **conecta e autentica** a conta — ainda não importa os pedidos reais para dentro do Dashboard/Estoque (que hoje continuam lendo os dados seedados). Isso é um próximo passo natural, caso façam sentido para o negócio.
+
 ## Notas de segurança
 
 - Nenhuma credencial é commitada: `.env` está no `.gitignore`, use `.env.example` como referência.
