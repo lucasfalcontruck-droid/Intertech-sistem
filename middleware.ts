@@ -3,20 +3,23 @@ import { NextResponse } from "next/server";
 
 export default auth((req) => {
   const isLoggedIn = !!req.auth;
-  const isLoginPage = req.nextUrl.pathname.startsWith("/login");
-  const isApiRoute = req.nextUrl.pathname.startsWith("/api");
+  const { pathname } = req.nextUrl;
+  const isLoginPage = pathname.startsWith("/login");
+  const isLandingPage = pathname === "/";
+  const isPublicPage = isLoginPage || isLandingPage;
+  const isApiRoute = pathname.startsWith("/api");
 
   if (!isLoggedIn && isApiRoute) {
     return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
   }
 
-  if (!isLoggedIn && !isLoginPage) {
+  if (!isLoggedIn && !isPublicPage) {
     const loginUrl = new URL("/login", req.nextUrl.origin);
-    loginUrl.searchParams.set("callbackUrl", req.nextUrl.pathname);
+    loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  if (isLoggedIn && isLoginPage) {
+  if (isLoggedIn && isPublicPage) {
     return NextResponse.redirect(new URL("/dashboard", req.nextUrl.origin));
   }
 
