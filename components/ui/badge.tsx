@@ -1,3 +1,4 @@
+/** components/ui/badge.tsx — Etiqueta colorida com bolinha (ex.: status de estoque/pagamento). */
 import { cn } from "@/lib/utils";
 
 export type BadgeVariant = "ok" | "low" | "out" | "pending" | "paid";

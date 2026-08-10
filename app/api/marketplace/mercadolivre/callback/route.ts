@@ -5,8 +5,25 @@ import { exchangeCodeForTokens, fetchMe } from "@/lib/marketplace/mercadolivre-c
 
 const STATE_COOKIE = "ml_oauth_state";
 
+/**
+ * app/api/marketplace/mercadolivre/callback/route.ts — Passo 2 do OAuth do
+ * Mercado Livre: recebe o `code`, valida o `state` (anti-CSRF), troca o
+ * código por tokens reais e salva em PlatformIntegration. Esta URL exata é
+ * a cadastrada como "redirect_uri" no app do Mercado Livre — não renomear
+ * nem mover sem atualizar lá e no .env (MERCADOLIVRE_REDIRECT_URI) também.
+ */
+
+/** Resolve a origem pública (proto+host) a partir dos headers de proxy, para não
+ * redirecionar de volta para "localhost" quando servido atrás de um túnel (ex.: ngrok). */
+function getPublicOrigin(req: NextRequest): string {
+  const proto = req.headers.get("x-forwarded-proto") ?? req.nextUrl.protocol.replace(":", "");
+  const host = req.headers.get("x-forwarded-host") ?? req.nextUrl.host;
+  return `${proto}://${host}`;
+}
+
+/** Finaliza o OAuth: troca o code por tokens e redireciona de volta para /marketplace. */
 export async function GET(req: NextRequest) {
-  const marketplaceUrl = new URL("/marketplace", req.nextUrl.origin);
+  const marketplaceUrl = new URL("/marketplace", getPublicOrigin(req));
 
   const code = req.nextUrl.searchParams.get("code");
   const state = req.nextUrl.searchParams.get("state");

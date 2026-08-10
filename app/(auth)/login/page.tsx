@@ -3,6 +3,7 @@ import { LoginForm } from "@/components/auth/login-form";
 import { Logo } from "@/components/ui/logo";
 import { GalaxyBackground } from "@/components/ui/galaxy-background";
 
+/** app/(auth)/login/page.tsx — Tela de login, rota "/login". */
 export default function LoginPage() {
   return (
     <div className="bg-app relative flex min-h-screen overflow-hidden">

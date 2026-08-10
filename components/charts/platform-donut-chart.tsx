@@ -4,6 +4,7 @@ import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 import { PLATFORM_COLOR } from "@/components/ui/platform-chip";
 import type { Platform } from "@prisma/client";
 
+/** components/charts/platform-donut-chart.tsx — Gráfico de rosca com a participação (%) de cada plataforma no faturamento. */
 interface Props {
   data: { platform: Platform; total: number; pct: number }[];
 }

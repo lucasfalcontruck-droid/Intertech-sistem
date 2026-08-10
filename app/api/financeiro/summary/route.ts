@@ -7,6 +7,9 @@ import {
   listTransactions,
 } from "@/lib/queries/financeiro";
 
+/** app/api/financeiro/summary/route.ts — Área Financeiro: KPIs, DRE, fluxo de caixa e listas para a página principal. */
+
+/** Agrega tudo que a página Financeiro precisa numa única resposta. */
 export async function GET() {
   try {
     const [kpis, cashFlow, dre, receivables, payables] = await Promise.all([

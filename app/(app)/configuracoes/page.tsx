@@ -1,6 +1,6 @@
 "use client";
 
-import { useConfiguracoes } from "@/hooks/use-configuracoes";
+import { useConfiguracoes } from "@/hooks/configuracoes/use-configuracoes";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { LoadingState, ErrorState } from "@/components/ui/state";
@@ -8,6 +8,7 @@ import { PLATFORM_LABEL } from "@/components/ui/platform-chip";
 import { formatDateTime, formatPercent, initials } from "@/lib/utils";
 import type { Platform } from "@prisma/client";
 
+/** app/(app)/configuracoes/page.tsx — Usuários do sistema e status das integrações de marketplace. */
 export default function ConfiguracoesPage() {
   const { data, isLoading, isError, error } = useConfiguracoes();
 

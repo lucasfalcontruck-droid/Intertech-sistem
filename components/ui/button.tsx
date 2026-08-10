@@ -1,3 +1,4 @@
+/** components/ui/button.tsx — Botão base com 3 variantes visuais (primary/secondary/sync). */
 import { cn } from "@/lib/utils";
 import type { ButtonHTMLAttributes } from "react";
 

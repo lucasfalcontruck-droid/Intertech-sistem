@@ -1,3 +1,4 @@
+/** components/ui/icons.tsx — Biblioteca de ícones SVG inline usados em toda a aplicação (um componente por ícone). */
 import type { SVGProps } from "react";
 
 type IconProps = SVGProps<SVGSVGElement>;
@@ -188,3 +189,27 @@ export const IconRefresh = (props: IconProps) =>
   );
 
 export const IconGear = IconSettings;
+
+export const IconUsers = (props: IconProps) =>
+  base(
+    props,
+    <>
+      <circle cx="9" cy="8" r="3.5" />
+      <path d="M2.5 20a6.5 6.5 0 0 1 13 0" />
+      <path d="M16 4.2a3.5 3.5 0 0 1 0 6.6" />
+      <path d="M18.5 14.3A6.5 6.5 0 0 1 21.5 20" />
+    </>,
+  );
+
+export const IconChevronDown = (props: IconProps) => base(props, <path d="m6 9 6 6 6-6" />);
+
+export const IconLogout = (props: IconProps) =>
+  base(
+    props,
+    <>
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <path d="M16 17l5-5-5-5" />
+      <path d="M21 12H9" />
+    </>,
+  );
+

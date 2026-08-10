@@ -1,3 +1,4 @@
+/** components/landing/device-frame.tsx — Moldura de "janela de app" usada nos mockups da landing page. */
 export function DeviceFrame({ path, children }: { path: string; children: React.ReactNode }) {
   return (
     <div className="w-full max-w-md rounded-2xl border border-border bg-card p-4 shadow-2xl">

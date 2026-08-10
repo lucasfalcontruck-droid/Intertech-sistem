@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 
+/** components/auth/login-form.tsx — Formulário de login (credentials do NextAuth), redireciona para callbackUrl ou /dashboard. */
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();

@@ -1,8 +1,15 @@
+/**
+ * lib/queries/marketplace.ts — Área Marketplace: cards de integração por
+ * plataforma (vendas, taxa, repasse) e evolução mensal de vendas por canal.
+ * Lê sempre do banco local — quem grava dados reais ali é o adaptador em
+ * lib/marketplace/ (ex.: MercadoLivreMarketplaceAdapter.syncInventory).
+ */
 import { Platform } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { REPORTING_WINDOW_DAYS } from "@/lib/constants";
 import { getMonthBuckets, subDays } from "@/lib/reporting";
 
+/** Monta os cards de integração e o gráfico de evolução de vendas por canal. */
 export async function getMarketplaceData() {
   const now = new Date();
   const windowStart = subDays(now, REPORTING_WINDOW_DAYS);
@@ -25,6 +32,7 @@ export async function getMarketplaceData() {
     MERCADO_LIVRE: { total: 0, count: 0 },
     SHOPEE: { total: 0, count: 0 },
     TIKTOK_SHOP: { total: 0, count: 0 },
+    VENDEDOR_RUA: { total: 0, count: 0 },
   };
   for (const o of windowOrders) {
     totals[o.platform].total += Number(o.total);
@@ -54,6 +62,7 @@ export async function getMarketplaceData() {
       MERCADO_LIVRE: 0,
       SHOPEE: 0,
       TIKTOK_SHOP: 0,
+      VENDEDOR_RUA: 0,
     };
     for (const o of historyOrders) {
       if (o.createdAt >= start && o.createdAt < end) {

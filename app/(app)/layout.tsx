@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
 
+/** app/(app)/layout.tsx — Layout do sistema logado: sidebar + topbar em volta de todas as páginas internas. */
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
   const user = {

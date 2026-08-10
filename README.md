@@ -16,14 +16,8 @@ ERP web para a operação da Intertech em marketplaces (Mercado Livre, Shopee e 
 ```
 app/
   (auth)/login/        # tela de login (fora do shell autenticado)
-  (app)/                # rotas protegidas (sidebar + topbar)
-    dashboard/
-    marketplace/
-    estoque/
-    financeiro/
-    pedidos/
-    relatorios/
-    configuracoes/
+  (app)/                # rotas do ERP (sidebar + topbar)
+    dashboard/ marketplace/ estoque/ financeiro/ pedidos/ relatorios/ configuracoes/
   api/                  # route handlers (dashboard, marketplace, products, transactions...)
 components/
   ui/                   # primitivos de design system (Badge, Card, KpiCard, Modal, ícones...)
@@ -85,7 +79,7 @@ npx prisma migrate dev
 npm run db:seed
 ```
 
-Isso cria um usuário administrador, as 3 integrações de marketplace, ~34 produtos (incluindo os itens com estoque baixo/esgotado usados como referência), ~4.400 pedidos distribuídos nos últimos 30 dias (com os totais mensais de Mercado Livre/Shopee/TikTok Shop batendo com os valores de referência) e os lançamentos financeiros (contas a receber/pagar, DRE, histórico de 6 meses de fluxo de caixa).
+Isso cria o usuário administrador de demonstração (tabela abaixo), as 3 integrações de marketplace, ~34 produtos (incluindo os itens com estoque baixo/esgotado usados como referência), ~4.400 pedidos distribuídos nos últimos 30 dias (com os totais mensais de Mercado Livre/Shopee/TikTok Shop batendo com os valores de referência) e os lançamentos financeiros (contas a receber/pagar, DRE, histórico de 6 meses de fluxo de caixa).
 
 ### 6. Iniciar o projeto
 
@@ -97,21 +91,22 @@ Acesse [http://localhost:3000](http://localhost:3000) — você será redirecion
 
 **Login de demonstração:**
 
-- E-mail: `admin@intertech.com`
-- Senha: `intertech123`
+| E-mail                | Senha           |
+| ---------------------- | --------------- |
+| `admin@intertech.com` | `intertech123`  |
 
 ## Scripts disponíveis
 
-| Comando                  | Descrição                                      |
-| ------------------------- | ----------------------------------------------- |
-| `npm run dev`              | Inicia o servidor de desenvolvimento             |
-| `npm run build`            | Build de produção                                |
-| `npm run start`            | Sobe o build de produção                         |
-| `npm run lint`             | ESLint                                           |
-| `npm run format`           | Formata o projeto com Prettier                   |
-| `npm run prisma:migrate`   | Roda `prisma migrate dev`                        |
-| `npm run prisma:studio`    | Abre o Prisma Studio                             |
-| `npm run db:seed`          | Popula o banco com dados de demonstração         |
+| Comando                  | Descrição                                |
+| ------------------------ | ---------------------------------------- |
+| `npm run dev`            | Inicia o servidor de desenvolvimento     |
+| `npm run build`          | Build de produção                        |
+| `npm run start`          | Sobe o build de produção                 |
+| `npm run lint`           | ESLint                                   |
+| `npm run format`         | Formata o projeto com Prettier           |
+| `npm run prisma:migrate` | Roda `prisma migrate dev`                |
+| `npm run prisma:studio`  | Abre o Prisma Studio                     |
+| `npm run db:seed`        | Popula o banco com dados de demonstração |
 
 ## Módulos
 

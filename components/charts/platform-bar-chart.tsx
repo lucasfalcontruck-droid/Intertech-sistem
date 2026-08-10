@@ -13,6 +13,8 @@ import {
 import type { Platform } from "@prisma/client";
 import { PLATFORM_COLOR, PLATFORM_LABEL } from "@/components/ui/platform-chip";
 import { CurrencyTooltip } from "./chart-tooltip";
+
+/** components/charts/platform-bar-chart.tsx — Gráfico de barras comparando vendas por plataforma (ML/Shopee/TikTok). */
 import { formatCompactCurrency } from "@/lib/utils";
 
 interface Props {
@@ -58,6 +60,12 @@ export function PlatformBarChart({ data }: Props) {
           dataKey="TIKTOK_SHOP"
           name={PLATFORM_LABEL.TIKTOK_SHOP}
           fill={PLATFORM_COLOR.TIKTOK_SHOP}
+          radius={[6, 6, 0, 0]}
+        />
+        <Bar
+          dataKey="VENDEDOR_RUA"
+          name={PLATFORM_LABEL.VENDEDOR_RUA}
+          fill={PLATFORM_COLOR.VENDEDOR_RUA}
           radius={[6, 6, 0, 0]}
         />
       </BarChart>

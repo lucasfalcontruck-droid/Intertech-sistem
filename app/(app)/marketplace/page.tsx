@@ -2,8 +2,8 @@
 
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { useMarketplace, useSyncMarketplace } from "@/hooks/use-marketplace";
-import { useTestMercadoLivre } from "@/hooks/use-mercadolivre";
+import { useMarketplace, useSyncMarketplace } from "@/hooks/marketplace/use-marketplace";
+import { useTestMercadoLivre } from "@/hooks/marketplace/use-mercadolivre";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { IconPlus, IconAlertTriangle, IconCheck } from "@/components/ui/icons";
@@ -38,6 +38,7 @@ function OAuthStatusBanner() {
   );
 }
 
+/** app/(app)/marketplace/page.tsx — Visão geral do Marketplace: cards de integração, sincronizar e conectar Mercado Livre. */
 export default function MarketplacePage() {
   const { data, isLoading, isError, error } = useMarketplace();
   const syncMutation = useSyncMarketplace();

@@ -1,6 +1,7 @@
 import { IconCheck } from "@/components/ui/icons";
 import { cn } from "@/lib/utils";
 
+/** components/landing/feature-showcase.tsx — Seção da landing page com texto + mockup lado a lado, alternando o lado (reverse). */
 export function FeatureShowcase({
   id,
   eyebrow,

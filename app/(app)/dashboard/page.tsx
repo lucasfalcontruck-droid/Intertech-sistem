@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useDashboard } from "@/hooks/use-dashboard";
+import { useDashboard } from "@/hooks/dashboard/use-dashboard";
 import { KpiCard } from "@/components/ui/kpi-card";
 import { Card, CardHeader, LinkButton } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ import { formatCurrency, formatDateTime, formatNumber, formatPercent } from "@/l
 import { PLATFORM_LABEL } from "@/components/ui/platform-chip";
 import type { OrderStatus } from "@prisma/client";
 
+/** app/(app)/dashboard/page.tsx — Visão geral do Dashboard: KPIs, gráficos e pedidos recentes. */
 const ORDER_STATUS_BADGE: Record<OrderStatus, { variant: BadgeVariant; label: string }> = {
   ENTREGUE: { variant: "ok", label: "Entregue" },
   ENVIADO: { variant: "pending", label: "Enviado" },

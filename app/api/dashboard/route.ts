@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { getDashboardData } from "@/lib/queries/dashboard";
 
+/** app/api/dashboard/route.ts — Área Dashboard: KPIs e gráficos da visão geral. */
+
+/** Retorna os dados da página inicial do Dashboard. */
 export async function GET() {
   try {
     const data = await getDashboardData();

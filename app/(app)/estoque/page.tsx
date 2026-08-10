@@ -8,7 +8,7 @@ import {
   useEstoqueSummary,
   useProducts,
   useUpdateProduct,
-} from "@/hooks/use-products";
+} from "@/hooks/estoque/use-products";
 import { KpiCard } from "@/components/ui/kpi-card";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,9 +31,10 @@ import {
 } from "@/components/ui/icons";
 import { formatCurrency, formatNumber } from "@/lib/utils";
 import type { Product } from "@/lib/types";
-import type { ProductFormInput } from "@/hooks/use-products";
+import type { ProductFormInput } from "@/hooks/estoque/use-products";
 import type { ProductStatus } from "@/lib/utils";
 
+/** app/(app)/estoque/page.tsx — Visão geral de Estoque: KPIs, produtos e CRUD de produtos. */
 const STATUS_LABEL: Record<ProductStatus, string> = { ok: "Ok", low: "Baixo", out: "Esgotado" };
 const STATUS_OPTIONS: ProductStatus[] = ["ok", "low", "out"];
 

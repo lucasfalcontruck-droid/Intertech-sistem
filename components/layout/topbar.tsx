@@ -4,6 +4,10 @@ import { usePathname } from "next/navigation";
 import { IconSearch, IconBell } from "@/components/ui/icons";
 import { initials } from "@/lib/utils";
 
+/**
+ * components/layout/topbar.tsx — Barra superior: título/subtítulo derivados
+ * da rota atual, busca e avatar do usuário logado.
+ */
 const TITLES: Record<string, [string, string]> = {
   "/dashboard": ["Dashboard", "Visão geral do negócio"],
   "/marketplace": ["Marketplace", "Integrações e canais de venda conectados"],
@@ -11,6 +15,7 @@ const TITLES: Record<string, [string, string]> = {
   "/financeiro": ["Financeiro", "Fluxo de caixa, contas e resultado do período"],
   "/pedidos": ["Pedidos", "Todos os pedidos de todas as plataformas"],
   "/relatorios": ["Relatórios", "Relatórios consolidados da operação"],
+  "/cadastros": ["Cadastros", "Cadastro de clientes e fornecedores"],
   "/configuracoes": ["Configurações", "Dados da empresa, usuários e integrações"],
 };
 

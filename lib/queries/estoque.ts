@@ -1,3 +1,7 @@
+/**
+ * lib/queries/estoque.ts — Área Estoque: listagem de produtos com filtros e
+ * agregações de valor/quantidade em estoque por categoria.
+ */
 import { prisma } from "@/lib/prisma";
 import { REPORTING_WINDOW_DAYS } from "@/lib/constants";
 import { subDays } from "@/lib/reporting";
@@ -9,6 +13,7 @@ export interface ProductFilters {
   status?: ProductStatus;
 }
 
+/** Lista produtos aplicando busca por nome/SKU, categoria e status de estoque. */
 export async function listProducts(filters: ProductFilters = {}) {
   const products = await prisma.product.findMany({
     where: {
@@ -34,6 +39,9 @@ export async function listProducts(filters: ProductFilters = {}) {
     price: Number(p.price),
     stock: p.stock,
     minStock: p.minStock,
+    costPrice: p.costPrice ? Number(p.costPrice) : null,
+    location: p.location,
+    adViews: p.adViews,
     status: getProductStatus(p.stock, p.minStock),
     channels: p.channels.map((c) => c.platform),
   }));
@@ -41,6 +49,7 @@ export async function listProducts(filters: ProductFilters = {}) {
   return filters.status ? withStatus.filter((p) => p.status === filters.status) : withStatus;
 }
 
+/** KPIs gerais de estoque: total de SKUs, valor em estoque, itens baixos/zerados. */
 export async function getStockSummary() {
   const products = await prisma.product.findMany({
     select: { price: true, stock: true, minStock: true },
@@ -54,6 +63,7 @@ export async function getStockSummary() {
   return { totalSkus, totalStockValue, lowStockCount, outOfStockCount };
 }
 
+/** Unidades vendidas por categoria nos últimos REPORTING_WINDOW_DAYS dias. */
 export async function getStockByCategory() {
   const windowStart = subDays(new Date(), REPORTING_WINDOW_DAYS);
 
@@ -73,6 +83,27 @@ export async function getStockByCategory() {
     .sort((a, b) => b.units - a.units);
 }
 
+/** Valor em estoque (preço × quantidade) agrupado por categoria. */
+export async function getStockValueByCategory() {
+  const products = await prisma.product.findMany({
+    select: { category: true, stock: true, price: true },
+  });
+
+  const totals = new Map<string, { skus: number; units: number; value: number }>();
+  for (const p of products) {
+    const current = totals.get(p.category) ?? { skus: 0, units: 0, value: 0 };
+    current.skus += 1;
+    current.units += p.stock;
+    current.value += p.stock * Number(p.price);
+    totals.set(p.category, current);
+  }
+
+  return Array.from(totals.entries())
+    .map(([category, data]) => ({ category, ...data }))
+    .sort((a, b) => b.value - a.value);
+}
+
+/** Lista de categorias distintas cadastradas, ordenadas alfabeticamente. */
 export async function getCategories() {
   const rows = await prisma.product.findMany({
     select: { category: true },

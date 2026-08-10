@@ -7,7 +7,7 @@ import {
   useDeleteTransaction,
   useFinanceiroSummary,
   useUpdateTransaction,
-} from "@/hooks/use-transactions";
+} from "@/hooks/financeiro/use-transactions";
 import { KpiCard } from "@/components/ui/kpi-card";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,8 +25,9 @@ import {
   IconExport,
 } from "@/components/ui/icons";
 import { formatCurrency } from "@/lib/utils";
-import type { TransactionFormInput } from "@/hooks/use-transactions";
+import type { TransactionFormInput } from "@/hooks/financeiro/use-transactions";
 
+/** app/(app)/financeiro/page.tsx — Visão geral do Financeiro: KPIs, fluxo de caixa e lançamentos recentes. */
 export default function FinanceiroPage() {
   const { data, isLoading, isError, error } = useFinanceiroSummary();
   const createMutation = useCreateTransaction();

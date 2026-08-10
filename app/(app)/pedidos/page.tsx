@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { OrderStatus, Platform } from "@prisma/client";
-import { usePedidos } from "@/hooks/use-pedidos";
+import { usePedidos } from "@/hooks/pedidos/use-pedidos";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { Card } from "@/components/ui/card";
 import { Badge, type BadgeVariant } from "@/components/ui/badge";
@@ -11,6 +11,7 @@ import { IconSearch } from "@/components/ui/icons";
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/state";
 import { formatCurrency, formatDateTime, formatNumber } from "@/lib/utils";
 
+/** app/(app)/pedidos/page.tsx — Lista de todos os pedidos de venda, com filtros por busca/plataforma/status/período. */
 const STATUS_BADGE: Record<OrderStatus, { variant: BadgeVariant; label: string }> = {
   ENTREGUE: { variant: "ok", label: "Entregue" },
   ENVIADO: { variant: "pending", label: "Enviado" },

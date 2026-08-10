@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Logo } from "@/components/ui/logo";
 
+/** components/landing/landing-navbar.tsx — Barra de navegação fixa da landing page. */
 const NAV_LINKS = [
   { href: "#modulos", label: "Módulos" },
   { href: "#como-funciona", label: "Como funciona" },

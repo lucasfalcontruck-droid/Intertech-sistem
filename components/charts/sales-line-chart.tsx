@@ -12,6 +12,7 @@ import {
 import { CurrencyTooltip } from "./chart-tooltip";
 import { formatCompactCurrency, formatDate } from "@/lib/utils";
 
+/** components/charts/sales-line-chart.tsx — Gráfico de área com a evolução diária de vendas (Dashboard). */
 interface Props {
   data: { date: string; total: number }[];
 }

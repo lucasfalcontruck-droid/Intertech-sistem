@@ -19,6 +19,7 @@
   --ml-color: #ffe600;
   --shopee-color: #ee4d2d;
   --tiktok-color: #25f4ee;
+  --vendedor-color: #f472b6;
 }
 
 @theme inline {
@@ -40,6 +41,7 @@
   --color-ml: var(--ml-color);
   --color-shopee: var(--shopee-color);
   --color-tiktok: var(--tiktok-color);
+  --color-vendedor: var(--vendedor-color);
   --font-sans: var(--font-inter);
 }
 

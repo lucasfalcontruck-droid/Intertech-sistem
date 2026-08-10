@@ -14,6 +14,7 @@ export const metadata: Metadata = {
   description: "ERP da Intertech para gestão de vendas, estoque e financeiro em marketplaces.",
 };
 
+/** app/layout.tsx — Layout raiz: fonte, metadata e o QueryProvider global. */
 export default function RootLayout({
   children,
 }: Readonly<{

@@ -1,3 +1,4 @@
+/** components/ui/kpi-card.tsx — Cartão de indicador (ícone, valor, rótulo e variação) usado nos dashboards. */
 import { cn } from "@/lib/utils";
 
 export function KpiCard({

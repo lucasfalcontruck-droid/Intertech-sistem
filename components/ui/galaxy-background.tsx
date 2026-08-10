@@ -1,3 +1,8 @@
+/**
+ * components/ui/galaxy-background.tsx — Fundo animado (blobs + estrelas) usado
+ * na tela de login e na landing page.
+ */
+
 /** Deterministic pseudo-random in [0, 1), stable across server and client renders. */
 function seeded(n: number): number {
   const x = Math.sin(n * 12.9898) * 43758.5453;

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { TransactionStatus, TransactionType } from "@prisma/client";
 import { Button } from "@/components/ui/button";
-import type { TransactionFormInput } from "@/hooks/use-transactions";
+import type { TransactionFormInput } from "@/hooks/financeiro/use-transactions";
 
 const inputClass =
   "w-full rounded-[10px] border border-border bg-card-2 px-3.5 py-2.5 text-sm text-ink outline-none placeholder:text-ink-muted focus:border-accent";
@@ -15,6 +15,7 @@ const STATUS_LABEL: Record<TransactionStatus, string> = {
   PAGO: "Pago",
 };
 
+/** components/financeiro/transaction-form.tsx — Formulário de criação de lançamento (conta a pagar/receber). */
 export function TransactionForm({
   defaultType,
   onSubmit,

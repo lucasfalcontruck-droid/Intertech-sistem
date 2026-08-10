@@ -5,7 +5,7 @@ import { Platform } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { PLATFORM_LABEL } from "@/components/ui/platform-chip";
 import type { Product } from "@/lib/types";
-import type { ProductFormInput } from "@/hooks/use-products";
+import type { ProductFormInput } from "@/hooks/estoque/use-products";
 
 const ALL_PLATFORMS: Platform[] = [Platform.MERCADO_LIVRE, Platform.SHOPEE, Platform.TIKTOK_SHOP];
 
@@ -13,6 +13,7 @@ const inputClass =
   "w-full rounded-[10px] border border-border bg-card-2 px-3.5 py-2.5 text-sm text-ink outline-none placeholder:text-ink-muted focus:border-accent";
 const labelClass = "mb-1.5 block text-xs font-semibold text-ink-secondary";
 
+/** components/estoque/product-form.tsx — Formulário de criação/edição de produto acabado. */
 export function ProductForm({
   initial,
   onSubmit,
@@ -32,6 +33,8 @@ export function ProductForm({
   const [price, setPrice] = useState(initial?.price.toString() ?? "");
   const [stock, setStock] = useState(initial?.stock.toString() ?? "0");
   const [minStock, setMinStock] = useState(initial?.minStock.toString() ?? "0");
+  const [costPrice, setCostPrice] = useState(initial?.costPrice?.toString() ?? "");
+  const [location, setLocation] = useState(initial?.location ?? "");
   const [channels, setChannels] = useState<Platform[]>(initial?.channels ?? []);
 
   function toggleChannel(platform: Platform) {
@@ -49,6 +52,8 @@ export function ProductForm({
       price: Number(price),
       stock: Number(stock),
       minStock: Number(minStock),
+      costPrice: costPrice ? Number(costPrice) : null,
+      location: location || null,
       channels,
     });
   }
@@ -122,6 +127,30 @@ export function ProductForm({
             value={minStock}
             onChange={(e) => setMinStock(e.target.value)}
             required
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className={labelClass}>Custo unitário (R$)</label>
+          <input
+            className={inputClass}
+            type="number"
+            min="0"
+            step="0.01"
+            value={costPrice}
+            onChange={(e) => setCostPrice(e.target.value)}
+            placeholder="Opcional"
+          />
+        </div>
+        <div>
+          <label className={labelClass}>Localização no estoque</label>
+          <input
+            className={inputClass}
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            placeholder="Ex: Galpão A - Prateleira 3"
           />
         </div>
       </div>

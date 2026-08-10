@@ -13,6 +13,8 @@ import {
 import type { Platform } from "@prisma/client";
 import { PLATFORM_COLOR, PLATFORM_LABEL } from "@/components/ui/platform-chip";
 import { CurrencyTooltip } from "./chart-tooltip";
+
+/** components/charts/platform-line-chart.tsx — Gráfico de linhas com a evolução de vendas por plataforma ao longo do tempo. */
 import { formatCompactCurrency } from "@/lib/utils";
 
 interface Props {
@@ -63,6 +65,14 @@ export function PlatformLineChart({ data }: Props) {
           dataKey="TIKTOK_SHOP"
           name={PLATFORM_LABEL.TIKTOK_SHOP}
           stroke={PLATFORM_COLOR.TIKTOK_SHOP}
+          strokeWidth={2.5}
+          dot={false}
+        />
+        <Line
+          type="monotone"
+          dataKey="VENDEDOR_RUA"
+          name={PLATFORM_LABEL.VENDEDOR_RUA}
+          stroke={PLATFORM_COLOR.VENDEDOR_RUA}
           strokeWidth={2.5}
           dot={false}
         />

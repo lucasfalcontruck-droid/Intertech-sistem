@@ -1,3 +1,4 @@
+/** components/ui/card.tsx — Container padrão de card, mais o cabeçalho e o botão-link usados dentro dele. */
 import { cn } from "@/lib/utils";
 
 export function Card({ className, children }: { className?: string; children: React.ReactNode }) {

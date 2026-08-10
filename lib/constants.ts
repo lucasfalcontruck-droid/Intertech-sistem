@@ -1,4 +1,9 @@
 /**
+ * lib/constants.ts — Constantes compartilhadas entre o seed e as queries de
+ * relatório (Financeiro/Relatórios), para as duas pontas ficarem sincronizadas.
+ */
+
+/**
  * Categories that compose the simplified DRE / "Despesas do mês" KPI.
  * Shared between the seed script and the reporting queries so both stay in sync.
  */

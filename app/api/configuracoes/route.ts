@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+/** app/api/configuracoes/route.ts — Área Configurações: usuários do sistema e status das integrações. */
+
+/** Retorna usuários cadastrados e o status de cada integração de marketplace. */
 export async function GET() {
   try {
     const [users, integrations] = await Promise.all([

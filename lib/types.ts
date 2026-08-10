@@ -1,6 +1,11 @@
+/**
+ * lib/types.ts — Formatos de dados (DTOs) devolvidos pelas rotas de API e
+ * consumidos pelos hooks/páginas do front-end. Um bloco por área do sistema.
+ */
 import type { OrderStatus, Platform, TransactionStatus, TransactionType } from "@prisma/client";
 import type { ProductStatus } from "@/lib/utils";
 
+// --- Dashboard ---
 export interface DashboardKpis {
   salesToday: number;
   salesTrend: number;
@@ -29,6 +34,7 @@ export interface DashboardData {
   grandTotal: number;
 }
 
+// --- Marketplace ---
 export interface IntegrationCard {
   platform: Platform;
   storeName: string;
@@ -46,6 +52,7 @@ export interface MarketplaceData {
   monthlyTrend: ({ month: string } & Record<Platform, number>)[];
 }
 
+// --- Estoque ---
 export interface Product {
   id: string;
   name: string;
@@ -54,6 +61,9 @@ export interface Product {
   price: number;
   stock: number;
   minStock: number;
+  costPrice: number | null;
+  location: string | null;
+  adViews: number;
   status: ProductStatus;
   channels: Platform[];
 }
@@ -71,6 +81,7 @@ export interface EstoqueSummaryData {
   categories: string[];
 }
 
+// --- Financeiro ---
 export interface Transaction {
   id: string;
   type: TransactionType;

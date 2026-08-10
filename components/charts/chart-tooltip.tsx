@@ -1,3 +1,4 @@
+/** components/charts/chart-tooltip.tsx — Tooltip customizado (formata valores como R$) reaproveitado pelos gráficos Recharts. */
 import { formatCurrency } from "@/lib/utils";
 
 interface TooltipPayloadItem {

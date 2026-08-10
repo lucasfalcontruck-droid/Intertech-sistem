@@ -4,6 +4,12 @@ import {
   OrderStatus,
   TransactionType,
   TransactionStatus,
+  FornecedorTipo,
+  PedidoCompraStatus,
+  CustoTipo,
+  InsumoMovimentoTipo,
+  DevolucaoStatus,
+  CampanhaStatus,
 } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { randomUUID } from "crypto";
@@ -120,6 +126,29 @@ const LAST_NAMES = [
 
 function randomCustomerName(): string {
   return `${pick(FIRST_NAMES)} ${pick(LAST_NAMES)}`;
+}
+
+const STATE_WEIGHTS: [string, number][] = [
+  ["SP", 45],
+  ["RJ", 15],
+  ["MG", 12],
+  ["RS", 8],
+  ["PR", 7],
+  ["BA", 5],
+  ["SC", 4],
+  ["GO", 2],
+  ["PE", 1.5],
+  ["CE", 1.5],
+];
+
+function randomState(): string {
+  const totalWeight = STATE_WEIGHTS.reduce((s, [, w]) => s + w, 0);
+  let roll = Math.random() * totalWeight;
+  for (const [state, weight] of STATE_WEIGHTS) {
+    if (roll < weight) return state;
+    roll -= weight;
+  }
+  return STATE_WEIGHTS[0][0];
 }
 
 function randomOrderStatus(createdAt: Date): OrderStatus {
@@ -542,10 +571,19 @@ async function main() {
   await prisma.product.deleteMany();
   await prisma.financialTransaction.deleteMany();
   await prisma.platformIntegration.deleteMany();
+  await prisma.pedidoCompra.deleteMany();
+  await prisma.fornecedor.deleteMany();
+  await prisma.cliente.deleteMany();
+  await prisma.custoItem.deleteMany();
+  await prisma.insumoMovimento.deleteMany();
+  await prisma.insumo.deleteMany();
+  await prisma.devolucao.deleteMany();
+  await prisma.campanha.deleteMany();
   await prisma.user.deleteMany();
 
-  console.log("Criando usuário administrador...");
+  console.log("Criando usuários...");
   const passwordHash = await bcrypt.hash("intertech123", 10);
+
   await prisma.user.create({
     data: {
       name: "Lucas Falcon",
@@ -570,9 +608,11 @@ async function main() {
   }
 
   console.log("Criando produtos e canais...");
+  const WAREHOUSES = ["Galpão A", "Galpão B"];
   const createdProducts: { id: string; sku: string; category: string; price: number }[] = [];
   const productBySku = new Map<string, { id: string; category: string; price: number }>();
   for (const p of PRODUCTS) {
+    const hasCostPrice = Math.random() < 0.8;
     const product = await prisma.product.create({
       data: {
         name: p.name,
@@ -581,6 +621,9 @@ async function main() {
         price: p.price,
         stock: p.stock,
         minStock: p.minStock,
+        costPrice: hasCostPrice ? Math.round(p.price * (0.5 + Math.random() * 0.15) * 100) / 100 : null,
+        location: `${pick(WAREHOUSES)} - Prateleira ${randomInt(1, 8)}`,
+        adViews: randomInt(300, 9000),
         channels: {
           create: p.channels.map((platform) => ({ platform })),
         },
@@ -595,6 +638,9 @@ async function main() {
     MERCADO_LIVRE: [],
     SHOPEE: [],
     TIKTOK_SHOP: [],
+    // Vendedor de Rua não recebe pedidos fictícios no seed — só pedidos reais,
+    // criados de verdade pelo app do vendedor via app/api/integrations/vendedor.
+    VENDEDOR_RUA: [],
   };
   for (const p of PRODUCTS) {
     const created = productBySku.get(p.sku);
@@ -656,6 +702,7 @@ async function main() {
     number: orderNumbers[idx],
     customerName: o.customerName,
     platform: o.platform,
+    state: randomState(),
     total: o.total,
     status: randomOrderStatus(o.createdAt),
     createdAt: o.createdAt,
@@ -835,6 +882,150 @@ async function main() {
       status: TransactionStatus.PAGO,
       paidAt: now,
     },
+  });
+
+  console.log("Criando clientes...");
+  await prisma.cliente.createMany({
+    data: [
+      { name: "Mariana Andrade", email: "mariana.andrade@gmail.com", phone: "(11) 98452-1290", city: "São Paulo", state: "SP" },
+      { name: "Rafael Nascimento", email: "rafael.nasc@hotmail.com", phone: "(21) 99123-4477", city: "Rio de Janeiro", state: "RJ" },
+      { name: "Juliana Ferreira", email: "ju.ferreira@outlook.com", phone: "(31) 98877-2233", city: "Belo Horizonte", state: "MG" },
+      { name: "Lucas Martins", email: "lucas.martins@gmail.com", phone: "(41) 99001-5566", city: "Curitiba", state: "PR" },
+      { name: "Camila Lima", email: "camila.lima@gmail.com", phone: "(51) 98234-9911", city: "Porto Alegre", state: "RS" },
+      { name: "Diego Costa", email: "diego.costa@yahoo.com", phone: "(71) 99456-8821", city: "Salvador", state: "BA" },
+    ],
+  });
+
+  console.log("Criando fornecedores...");
+  const fornecedoresData = [
+    { name: "Shenzhen Tech", tipo: FornecedorTipo.INSUMO, contact: "sales@shenzhentech.cn", leadTimeDays: 18, active: true },
+    { name: "Guangzhou Cables", tipo: FornecedorTipo.INSUMO, contact: "contato@gzcables.cn", leadTimeDays: 15, active: true },
+    { name: "Embalagens SP", tipo: FornecedorTipo.INSUMO, contact: "vendas@embalagenssp.com.br", leadTimeDays: 4, active: true },
+    { name: "PowerCell Baterias", tipo: FornecedorTipo.INSUMO, contact: "comercial@powercell.com.br", leadTimeDays: 22, active: true },
+    { name: "Fábrica Parceira Eletrônicos SP", tipo: FornecedorTipo.PRODUTO, contact: "parceria@fabricaeletronicos.com.br", leadTimeDays: 12, active: true },
+    { name: "Terceirizada Casa & Decoração", tipo: FornecedorTipo.PRODUTO, contact: "contato@casadecor.com.br", leadTimeDays: 9, active: true },
+    { name: "Terceirizada Ferramentas Sul", tipo: FornecedorTipo.PRODUTO, contact: "vendas@ferramentassul.com.br", leadTimeDays: 20, active: true },
+  ];
+  const createdFornecedores = [];
+  for (const f of fornecedoresData) {
+    createdFornecedores.push(await prisma.fornecedor.create({ data: f }));
+  }
+  const fornecedorByName = new Map(createdFornecedores.map((f) => [f.name, f]));
+
+  console.log("Criando pedidos de compra...");
+  const pedidosCompraData: {
+    tipo: FornecedorTipo;
+    fornecedor: string;
+    itemName: string;
+    quantity: number;
+    value: number;
+    status: PedidoCompraStatus;
+    expectedDaysFromNow: number;
+  }[] = [
+    { tipo: FornecedorTipo.INSUMO, fornecedor: "Shenzhen Tech", itemName: "Placa PCB Bluetooth", quantity: 500, value: 8900, status: PedidoCompraStatus.EM_TRANSITO, expectedDaysFromNow: 8 },
+    { tipo: FornecedorTipo.INSUMO, fornecedor: "Guangzhou Cables", itemName: "Cabo USB-C 1m", quantity: 1200, value: 4560, status: PedidoCompraStatus.RECEBIDO, expectedDaysFromNow: -3 },
+    { tipo: FornecedorTipo.INSUMO, fornecedor: "Embalagens SP", itemName: "Espuma protetora", quantity: 800, value: 1600, status: PedidoCompraStatus.RECEBIDO, expectedDaysFromNow: -7 },
+    { tipo: FornecedorTipo.INSUMO, fornecedor: "PowerCell Baterias", itemName: "Bateria Li-ion 500mAh", quantity: 600, value: 9000, status: PedidoCompraStatus.AGUARDANDO, expectedDaysFromNow: 14 },
+    { tipo: FornecedorTipo.PRODUTO, fornecedor: "Fábrica Parceira Eletrônicos SP", itemName: "Fone Bluetooth Pro X", quantity: 300, value: 18720, status: PedidoCompraStatus.EM_TRANSITO, expectedDaysFromNow: 6 },
+    { tipo: FornecedorTipo.PRODUTO, fornecedor: "Terceirizada Casa & Decoração", itemName: "Suporte Notebook Alumínio", quantity: 150, value: 6180, status: PedidoCompraStatus.RECEBIDO, expectedDaysFromNow: -5 },
+    { tipo: FornecedorTipo.PRODUTO, fornecedor: "Terceirizada Ferramentas Sul", itemName: "Kit Ferramentas 46 peças", quantity: 120, value: 8940, status: PedidoCompraStatus.AGUARDANDO, expectedDaysFromNow: 20 },
+  ];
+  let pcNumber = 3100;
+  for (const pc of pedidosCompraData) {
+    pcNumber += 1;
+    const fornecedor = fornecedorByName.get(pc.fornecedor)!;
+    await prisma.pedidoCompra.create({
+      data: {
+        number: `PC-${pcNumber}`,
+        tipo: pc.tipo,
+        fornecedorId: fornecedor.id,
+        itemName: pc.itemName,
+        quantity: pc.quantity,
+        value: pc.value,
+        status: pc.status,
+        expectedDate: daysFromNow(pc.expectedDaysFromNow),
+      },
+    });
+  }
+
+  console.log("Criando custos fixos e variáveis...");
+  await prisma.custoItem.createMany({
+    data: [
+      { name: "Aluguel dos galpões", tipo: CustoTipo.FIXO, value: 12500 },
+      { name: "Folha de pagamento", tipo: CustoTipo.FIXO, value: 24800 },
+      { name: "Softwares e assinaturas", tipo: CustoTipo.FIXO, value: 2140 },
+      { name: "Contabilidade", tipo: CustoTipo.FIXO, value: 1800 },
+      { name: "Comissões e taxas de marketplace", tipo: CustoTipo.VARIAVEL, value: 18420 },
+      { name: "Frete e logística", tipo: CustoTipo.VARIAVEL, value: 9860 },
+      { name: "Embalagens", tipo: CustoTipo.VARIAVEL, value: 3120 },
+      { name: "Campanhas de anúncios", tipo: CustoTipo.VARIAVEL, value: 4210 },
+    ],
+  });
+
+  console.log("Criando insumos e movimentações...");
+  const insumosData = [
+    { name: "Placa PCB Bluetooth", unit: "un", currentStock: 640, minStock: 200, unitCost: 17.8 },
+    { name: "Case plástico ABS", unit: "un", currentStock: 410, minStock: 150, unitCost: 7.0 },
+    { name: "Cabo USB-C 1m", unit: "un", currentStock: 1850, minStock: 400, unitCost: 3.8 },
+    { name: "Bateria Li-ion 500mAh", unit: "un", currentStock: 320, minStock: 250, unitCost: 15.0 },
+    { name: "Espuma protetora", unit: "un", currentStock: 980, minStock: 300, unitCost: 2.0 },
+  ];
+  const createdInsumos = [];
+  for (const i of insumosData) {
+    createdInsumos.push(await prisma.insumo.create({ data: i }));
+  }
+  const insumoByName = new Map(createdInsumos.map((i) => [i.name, i]));
+
+  const movimentosData: {
+    insumo: string;
+    tipo: InsumoMovimentoTipo;
+    quantity: number;
+    notaFiscal: string;
+    party: string;
+    value: number;
+    daysAgoRef: number;
+  }[] = [
+    { insumo: "Placa PCB Bluetooth", tipo: InsumoMovimentoTipo.ENTRADA, quantity: 500, notaFiscal: "NF-000482", party: "Shenzhen Tech", value: 8900, daysAgoRef: 1 },
+    { insumo: "Case plástico ABS", tipo: InsumoMovimentoTipo.SAIDA, quantity: 340, notaFiscal: "NF-000481", party: "Linha de produção - Fones", value: 2380, daysAgoRef: 2 },
+    { insumo: "Cabo USB-C 1m", tipo: InsumoMovimentoTipo.ENTRADA, quantity: 1200, notaFiscal: "NF-000479", party: "Guangzhou Cables", value: 4560, daysAgoRef: 3 },
+    { insumo: "Bateria Li-ion 500mAh", tipo: InsumoMovimentoTipo.SAIDA, quantity: 214, notaFiscal: "NF-000475", party: "Linha de produção - Carregadores", value: 3210, daysAgoRef: 5 },
+    { insumo: "Espuma protetora", tipo: InsumoMovimentoTipo.ENTRADA, quantity: 800, notaFiscal: "NF-000471", party: "Embalagens SP", value: 1600, daysAgoRef: 7 },
+    { insumo: "Placa PCB Bluetooth", tipo: InsumoMovimentoTipo.SAIDA, quantity: 180, notaFiscal: "NF-000468", party: "Linha de produção - Fones", value: 3204, daysAgoRef: 9 },
+  ];
+  for (const m of movimentosData) {
+    const insumo = insumoByName.get(m.insumo)!;
+    await prisma.insumoMovimento.create({
+      data: {
+        insumoId: insumo.id,
+        tipo: m.tipo,
+        quantity: m.quantity,
+        notaFiscal: m.notaFiscal,
+        party: m.party,
+        value: m.value,
+        date: daysAgo(m.daysAgoRef),
+      },
+    });
+  }
+
+  console.log("Criando devoluções...");
+  await prisma.devolucao.createMany({
+    data: [
+      { orderNumber: "48213", product: "Câmera de Segurança Wifi", reason: "Produto com defeito", platform: Platform.MERCADO_LIVRE, value: 249.9, status: DevolucaoStatus.SOLICITADA, createdAt: daysAgo(2) },
+      { orderNumber: "48190", product: "Fone Bluetooth Pro X", reason: "Comprador arrependido", platform: Platform.MERCADO_LIVRE, value: 189.9, status: DevolucaoStatus.EM_ANALISE, createdAt: daysAgo(3) },
+      { orderNumber: "48155", product: "Mouse Gamer RGB", reason: "Não era o esperado", platform: Platform.SHOPEE, value: 99.9, status: DevolucaoStatus.APROVADA, createdAt: daysAgo(5) },
+      { orderNumber: "48042", product: "Kit Ferramentas 46 peças", reason: "Item incompleto", platform: Platform.TIKTOK_SHOP, value: 179.9, status: DevolucaoStatus.REEMBOLSADA, createdAt: daysAgo(8) },
+      { orderNumber: "47988", product: "Carregador USB-C 20W", reason: "Produto com defeito", platform: Platform.MERCADO_LIVRE, value: 59.9, status: DevolucaoStatus.REEMBOLSADA, createdAt: daysAgo(11) },
+    ],
+  });
+
+  console.log("Criando campanhas...");
+  await prisma.campanha.createMany({
+    data: [
+      { name: "Fone Bluetooth — Black Week", platform: Platform.MERCADO_LIVRE, dailyBudget: 80, spent: 612.4, clicks: 3210, conversions: 214, status: CampanhaStatus.ATIVA },
+      { name: "Carregadores — Alcance geral", platform: Platform.MERCADO_LIVRE, dailyBudget: 40, spent: 298.1, clicks: 1840, conversions: 76, status: CampanhaStatus.ATIVA },
+      { name: "Linha casa — Impulso", platform: Platform.SHOPEE, dailyBudget: 30, spent: 205.7, clicks: 1120, conversions: 41, status: CampanhaStatus.PAUSADA },
+      { name: "Kit ferramentas — Lançamento", platform: Platform.TIKTOK_SHOP, dailyBudget: 25, spent: 187.3, clicks: 940, conversions: 18, status: CampanhaStatus.ENCERRADA },
+    ],
   });
 
   console.log("Seed concluído com sucesso.");

@@ -1,3 +1,7 @@
+/**
+ * lib/marketplace/types.ts — Contrato comum (MarketplaceAdapter) que todo
+ * adaptador de canal de venda deve implementar, real ou mock.
+ */
 import type { OrderStatus, Platform } from "@prisma/client";
 
 export interface SalesSummary {

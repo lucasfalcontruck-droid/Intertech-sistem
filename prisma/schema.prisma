@@ -15,6 +15,7 @@ enum Platform {
   MERCADO_LIVRE
   SHOPEE
   TIKTOK_SHOP
+  VENDEDOR_RUA
 }
 
 enum IntegrationStatus {
@@ -40,6 +41,40 @@ enum TransactionStatus {
   PAGO
 }
 
+enum FornecedorTipo {
+  INSUMO
+  PRODUTO
+}
+
+enum PedidoCompraStatus {
+  AGUARDANDO
+  EM_TRANSITO
+  RECEBIDO
+}
+
+enum CustoTipo {
+  FIXO
+  VARIAVEL
+}
+
+enum InsumoMovimentoTipo {
+  ENTRADA
+  SAIDA
+}
+
+enum DevolucaoStatus {
+  SOLICITADA
+  EM_ANALISE
+  APROVADA
+  REEMBOLSADA
+}
+
+enum CampanhaStatus {
+  ATIVA
+  PAUSADA
+  ENCERRADA
+}
+
 // ---------------------------------------------------------------------------
 // Models
 // ---------------------------------------------------------------------------
@@ -55,15 +90,18 @@ model User {
 }
 
 model Product {
-  id           String   @id @default(cuid())
-  name         String
-  sku          String   @unique
-  category     String
-  price        Decimal  @db.Decimal(10, 2)
-  stock        Int      @default(0)
-  minStock     Int      @default(0)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id        String   @id @default(cuid())
+  name      String
+  sku       String   @unique
+  category  String
+  price     Decimal  @db.Decimal(10, 2)
+  stock     Int      @default(0)
+  minStock  Int      @default(0)
+  costPrice Decimal? @db.Decimal(10, 2)
+  location  String?
+  adViews   Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   channels   ProductChannel[]
   orderItems OrderItem[]
@@ -87,6 +125,7 @@ model Order {
   number       String      @unique
   customerName String
   platform     Platform
+  state        String?
   total        Decimal     @db.Decimal(10, 2)
   status       OrderStatus @default(PROCESSANDO)
   createdAt    DateTime    @default(now())
@@ -109,30 +148,141 @@ model OrderItem {
 }
 
 model PlatformIntegration {
-  id             String            @id @default(cuid())
-  platform       Platform          @unique
-  storeName      String
-  status         IntegrationStatus @default(DISCONNECTED)
-  feePercentage  Decimal           @db.Decimal(5, 2)
-  credentials    Json?
-  lastSyncedAt   DateTime?
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
+  id            String            @id @default(cuid())
+  platform      Platform          @unique
+  storeName     String
+  status        IntegrationStatus @default(DISCONNECTED)
+  feePercentage Decimal           @db.Decimal(5, 2)
+  credentials   Json?
+  lastSyncedAt  DateTime?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
 }
 
 model FinancialTransaction {
-  id            String             @id @default(cuid())
-  type          TransactionType
-  description   String
-  category      String
-  amount        Decimal            @db.Decimal(12, 2)
-  dueDate       DateTime
-  status        TransactionStatus  @default(PENDENTE)
-  paidAt        DateTime?
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @updatedAt
+  id          String            @id @default(cuid())
+  type        TransactionType
+  description String
+  category    String
+  amount      Decimal           @db.Decimal(12, 2)
+  dueDate     DateTime
+  status      TransactionStatus @default(PENDENTE)
+  paidAt      DateTime?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
 
   @@index([type])
   @@index([status])
   @@index([dueDate])
+}
+
+model Cliente {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  phone     String
+  city      String
+  state     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Fornecedor {
+  id           String         @id @default(cuid())
+  name         String
+  tipo         FornecedorTipo
+  contact      String
+  leadTimeDays Int            @default(0)
+  active       Boolean        @default(true)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  pedidosCompra PedidoCompra[]
+
+  @@index([tipo])
+}
+
+model PedidoCompra {
+  id           String             @id @default(cuid())
+  number       String             @unique
+  tipo         FornecedorTipo
+  fornecedorId String
+  itemName     String
+  quantity     Int
+  value        Decimal            @db.Decimal(12, 2)
+  status       PedidoCompraStatus @default(AGUARDANDO)
+  expectedDate DateTime
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  fornecedor Fornecedor @relation(fields: [fornecedorId], references: [id])
+
+  @@index([tipo])
+  @@index([status])
+}
+
+model CustoItem {
+  id        String    @id @default(cuid())
+  name      String
+  tipo      CustoTipo
+  value     Decimal   @db.Decimal(12, 2)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([tipo])
+}
+
+model Insumo {
+  id           String   @id @default(cuid())
+  name         String   @unique
+  unit         String   @default("un")
+  currentStock Int      @default(0)
+  minStock     Int      @default(0)
+  unitCost     Decimal  @db.Decimal(10, 2)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  movimentos InsumoMovimento[]
+}
+
+model InsumoMovimento {
+  id         String              @id @default(cuid())
+  insumoId   String
+  tipo       InsumoMovimentoTipo
+  quantity   Int
+  notaFiscal String
+  party      String
+  value      Decimal             @db.Decimal(12, 2)
+  date       DateTime            @default(now())
+
+  insumo Insumo @relation(fields: [insumoId], references: [id], onDelete: Cascade)
+
+  @@index([insumoId])
+}
+
+model Devolucao {
+  id          String          @id @default(cuid())
+  orderNumber String?
+  product     String
+  reason      String
+  platform    Platform
+  value       Decimal         @db.Decimal(10, 2)
+  status      DevolucaoStatus @default(SOLICITADA)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([status])
+}
+
+model Campanha {
+  id          String         @id @default(cuid())
+  name        String
+  platform    Platform
+  dailyBudget Decimal        @db.Decimal(10, 2)
+  spent       Decimal        @default(0) @db.Decimal(10, 2)
+  clicks      Int            @default(0)
+  conversions Int            @default(0)
+  status      CampanhaStatus @default(ATIVA)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 }

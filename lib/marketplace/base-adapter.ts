@@ -17,6 +17,7 @@ import type {
 export class SeedBackedMarketplaceAdapter implements MarketplaceAdapter {
   constructor(public readonly platform: Platform) {}
 
+  /** Soma vendas e calcula ticket médio a partir dos pedidos locais no período. */
   async getSales(periodStart: Date, periodEnd: Date): Promise<SalesSummary> {
     const orders = await prisma.order.findMany({
       where: {
@@ -39,6 +40,7 @@ export class SeedBackedMarketplaceAdapter implements MarketplaceAdapter {
     };
   }
 
+  /** Lista pedidos locais dessa plataforma, mais recentes primeiro. */
   async getOrders(params: GetOrdersParams = {}): Promise<MarketplaceOrder[]> {
     const orders = await prisma.order.findMany({
       where: {
@@ -60,6 +62,7 @@ export class SeedBackedMarketplaceAdapter implements MarketplaceAdapter {
     }));
   }
 
+  /** Mock: só recontabiliza o que já existe localmente (não busca nada externo). */
   async syncInventory(): Promise<SyncResult> {
     const [ordersSynced, productsSynced] = await Promise.all([
       prisma.order.count({ where: { platform: this.platform } }),

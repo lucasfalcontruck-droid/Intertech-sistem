@@ -3,6 +3,7 @@
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { formatNumber } from "@/lib/utils";
 
+/** components/charts/category-bar-chart.tsx — Gráfico de barras horizontais de unidades vendidas por categoria. */
 interface Props {
   data: { category: string; units: number }[];
 }

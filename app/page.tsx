@@ -13,6 +13,7 @@ import { QuoteSection } from "@/components/landing/quote-section";
 import { Logo } from "@/components/ui/logo";
 import { GalaxyBackground } from "@/components/ui/galaxy-background";
 
+/** app/page.tsx — Landing page pública (marketing), rota "/". */
 const STEPS = [
   {
     step: "01",

@@ -28,6 +28,9 @@ export default auth((req) => {
 
 export const config = {
   matcher: [
-    "/((?!api/auth|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico)$).*)",
+    // api/integrations/vendedor fica de fora porque é o app do vendedor de rua
+    // chamando o back-end direto (autenticado por chave, ver lib/integrations/
+    // vendedor-auth.ts), não uma pessoa logada no navegador.
+    "/((?!api/auth|api/integrations/vendedor|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico)$).*)",
   ],
 };

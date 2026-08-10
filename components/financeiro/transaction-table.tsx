@@ -13,6 +13,7 @@ const STATUS_BADGE: Record<TransactionStatus, { variant: BadgeVariant; label: st
   PAGO: { variant: "paid", label: "Pago" },
 };
 
+/** components/financeiro/transaction-table.tsx — Tabela de lançamentos (contas a pagar/receber) com ações de marcar pago/excluir. */
 export function TransactionTable({
   transactions,
   descriptionHeader,

@@ -1,3 +1,4 @@
+/** components/ui/logo.tsx — Logo da Intertech, com largura calculada a partir da altura. */
 import Image from "next/image";
 
 const ASPECT_RATIO = 769 / 159;

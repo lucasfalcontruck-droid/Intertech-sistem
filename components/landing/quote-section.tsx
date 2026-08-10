@@ -1,5 +1,6 @@
 import { initials } from "@/lib/utils";
 
+/** components/landing/quote-section.tsx — Seção de depoimento/citação da landing page. */
 export function QuoteSection() {
   return (
     <section className="px-6 py-16">

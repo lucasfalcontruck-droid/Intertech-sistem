@@ -9,6 +9,7 @@ import {
   IconReports,
 } from "@/components/ui/icons";
 
+/** components/landing/features-grid.tsx — Grade de cards com as funcionalidades do sistema, na landing page. */
 const FEATURES = [
   {
     icon: IconDashboard,

@@ -1,3 +1,4 @@
+/** components/landing/stats-bar.tsx — Faixa de estatísticas em destaque na landing page. */
 const STATS = [
   { value: "3", label: "canais de venda integrados" },
   { value: "+4.400", label: "pedidos monitorados por mês" },

@@ -1,13 +1,19 @@
+/**
+ * lib/queries/dashboard.ts — Área Dashboard: agrega KPIs (vendas, pedidos,
+ * ticket médio, estoque baixo) e séries para os gráficos da visão geral.
+ */
 import { Platform } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { REPORTING_WINDOW_DAYS } from "@/lib/constants";
 import { getWeekBuckets, startOfDay, subDays } from "@/lib/reporting";
 
+/** Variação percentual entre dois valores, tratando o caso de base zero. */
 function pctChange(current: number, previous: number): number {
   if (previous === 0) return current > 0 ? 100 : 0;
   return ((current - previous) / previous) * 100;
 }
 
+/** Monta todos os dados exibidos na página inicial do Dashboard. */
 export async function getDashboardData() {
   const now = new Date();
   const todayStart = startOfDay(now);
@@ -69,6 +75,7 @@ export async function getDashboardData() {
       MERCADO_LIVRE: 0,
       SHOPEE: 0,
       TIKTOK_SHOP: 0,
+      VENDEDOR_RUA: 0,
     };
     for (const o of windowOrders) {
       if (o.createdAt >= start && o.createdAt < end) {
@@ -82,6 +89,7 @@ export async function getDashboardData() {
     MERCADO_LIVRE: 0,
     SHOPEE: 0,
     TIKTOK_SHOP: 0,
+    VENDEDOR_RUA: 0,
   };
   for (const o of windowOrders) platformTotals[o.platform] += Number(o.total);
   const grandTotal = Object.values(platformTotals).reduce((a, b) => a + b, 0);

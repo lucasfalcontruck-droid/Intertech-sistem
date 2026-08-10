@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 
+/** components/ui/modal.tsx — Modal genérico (portal), fecha com Esc e trava o scroll do body enquanto aberto. */
 export function Modal({
   open,
   onClose,

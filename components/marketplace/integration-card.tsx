@@ -8,6 +8,11 @@ import { IconRefresh, IconSettings, IconCheck } from "@/components/ui/icons";
 import { formatCurrency, formatNumber, formatPercent } from "@/lib/utils";
 import type { IntegrationCard as IntegrationCardData } from "@/lib/types";
 
+/**
+ * components/marketplace/integration-card.tsx — Card de cada canal de venda
+ * (Mercado Livre/Shopee/TikTok Shop) na tela Marketplace, com botões de
+ * Sincronizar, Configurar (leva ao OAuth do ML) e Testar conexão real.
+ */
 const ICON_STYLE: Record<Platform, React.CSSProperties> = {
   MERCADO_LIVRE: { background: PLATFORM_COLOR.MERCADO_LIVRE, color: "#0a0a0a" },
   SHOPEE: { background: PLATFORM_COLOR.SHOPEE, color: "#fff" },
@@ -16,6 +21,7 @@ const ICON_STYLE: Record<Platform, React.CSSProperties> = {
     color: PLATFORM_COLOR.TIKTOK_SHOP,
     border: `1px solid ${PLATFORM_COLOR.TIKTOK_SHOP}`,
   },
+  VENDEDOR_RUA: { background: PLATFORM_COLOR.VENDEDOR_RUA, color: "#1a0a12" },
 };
 
 export function IntegrationCard({

@@ -2,6 +2,13 @@ import { NextResponse } from "next/server";
 import { getValidMercadoLivreCredentials } from "@/lib/marketplace/mercadolivre-auth";
 import { fetchMe, fetchRecentOrders } from "@/lib/marketplace/mercadolivre-client";
 
+/**
+ * app/api/marketplace/mercadolivre/test/route.ts — Botão "Testar conexão
+ * real": chama a API ao vivo do Mercado Livre (não o banco local) para
+ * confirmar que o token salvo funciona, mostrando conta e pedidos reais.
+ */
+
+/** Testa a conexão real com o Mercado Livre. */
 export async function GET() {
   try {
     const creds = await getValidMercadoLivreCredentials();

@@ -13,6 +13,8 @@ import {
 import { CurrencyTooltip } from "./chart-tooltip";
 import { formatCompactCurrency } from "@/lib/utils";
 
+/** components/charts/cash-flow-chart.tsx — Gráfico de barras entradas x saídas (fluxo de caixa mensal). */
+
 interface Props {
   data: { month: string; entradas: number; saidas: number }[];
 }

@@ -1,5 +1,6 @@
 import { IconRevenue, IconOrders, IconTrendUp } from "@/components/ui/icons";
 
+/** components/landing/hero-visual.tsx — Ilustração animada do topo da landing page. */
 function PlusGrid() {
   return (
     <div className="grid grid-cols-5 gap-2.5 text-white/15" aria-hidden>

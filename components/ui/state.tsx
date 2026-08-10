@@ -1,3 +1,4 @@
+/** components/ui/state.tsx — Estados genéricos de carregando/erro/vazio, usados em quase toda tela com dados assíncronos. */
 export function LoadingState({ label = "Carregando..." }: { label?: string }) {
   return (
     <div className="flex items-center justify-center gap-2 py-16 text-sm text-ink-muted">

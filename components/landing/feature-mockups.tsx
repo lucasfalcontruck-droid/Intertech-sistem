@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { PlatformChip } from "@/components/ui/platform-chip";
 import { Platform } from "@prisma/client";
 
+/** components/landing/feature-mockups.tsx — Mockups estáticos (dados fictícios) de telas do sistema, exibidos na landing page. */
 export function MarketplaceMockup() {
   const rows = [
     { platform: Platform.MERCADO_LIVRE, sales: "R$ 218.400", orders: "1.428" },

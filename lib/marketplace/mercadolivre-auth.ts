@@ -1,3 +1,8 @@
+/**
+ * lib/marketplace/mercadolivre-auth.ts — Guarda o access/refresh token do
+ * Mercado Livre no banco (PlatformIntegration) e renova automaticamente
+ * quando expira, para as outras rotinas não precisarem se preocupar com isso.
+ */
 import { Platform } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { refreshTokens, type MercadoLivreTokens } from "./mercadolivre-client";

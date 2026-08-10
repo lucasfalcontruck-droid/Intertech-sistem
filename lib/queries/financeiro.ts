@@ -1,3 +1,7 @@
+/**
+ * lib/queries/financeiro.ts — Área Financeiro: KPIs de caixa, DRE simplificado,
+ * fluxo de caixa mensal e listas de contas a pagar/receber.
+ */
 import { TransactionStatus, TransactionType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import {
@@ -7,6 +11,7 @@ import {
 } from "@/lib/constants";
 import { getMonthBuckets, subDays } from "@/lib/reporting";
 
+/** Soma o total de pedidos (receita) desde `windowStart`. */
 async function getRevenueWindow(windowStart: Date) {
   const orders = await prisma.order.findMany({
     where: { createdAt: { gte: windowStart } },
@@ -15,6 +20,7 @@ async function getRevenueWindow(windowStart: Date) {
   return orders.reduce((sum, o) => sum + Number(o.total), 0);
 }
 
+/** Soma as saídas classificadas como despesa do DRE desde `windowStart`. */
 async function getExpensesWindow(windowStart: Date) {
   const transactions = await prisma.financialTransaction.findMany({
     where: {
@@ -27,6 +33,7 @@ async function getExpensesWindow(windowStart: Date) {
   return transactions.reduce((sum, t) => sum + Number(t.amount), 0);
 }
 
+/** KPIs do card financeiro: receita, despesas, lucro líquido e saldo em caixa. */
 export async function getFinanceKpis() {
   const windowStart = subDays(new Date(), REPORTING_WINDOW_DAYS);
   const [revenueMonth, expensesMonth, paidIn, paidOut] = await Promise.all([
@@ -54,6 +61,7 @@ export async function getFinanceKpis() {
   };
 }
 
+/** Fluxo de caixa mensal (entradas x saídas) dos últimos 6 meses para o gráfico. */
 export async function getCashFlowHistory() {
   const buckets = getMonthBuckets(6);
   const historyStart = buckets[0].start;
@@ -98,6 +106,7 @@ export async function getCashFlowHistory() {
   });
 }
 
+/** DRE simplificado: receita bruta, deduções por categoria e lucro líquido. */
 export async function getDRE() {
   const windowStart = subDays(new Date(), REPORTING_WINDOW_DAYS);
   const grossRevenue = await getRevenueWindow(windowStart);
@@ -121,6 +130,7 @@ export async function getDRE() {
   };
 }
 
+/** Lista lançamentos (contas a pagar/receber) de um tipo, mais próximos do vencimento. */
 export async function listTransactions(type: TransactionType, take = 8) {
   const rows = await prisma.financialTransaction.findMany({
     where: { type, category: { notIn: [...CASH_FLOW_ROLLUP_CATEGORIES] } },
