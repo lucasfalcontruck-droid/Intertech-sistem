@@ -2,23 +2,13 @@
 
 import { usePathname } from "next/navigation";
 import { IconSearch, IconBell } from "@/components/ui/icons";
+import { getPageInfo } from "@/components/layout/nav-data";
 import { initials } from "@/lib/utils";
 
 /**
- * components/layout/topbar.tsx — Barra superior: título/subtítulo derivados
- * da rota atual, busca e avatar do usuário logado.
+ * components/layout/topbar.tsx — Barra superior: título/frase de contexto
+ * derivados da rota atual (via nav-data), busca e avatar do usuário logado.
  */
-const TITLES: Record<string, [string, string]> = {
-  "/dashboard": ["Dashboard", "Visão geral do negócio"],
-  "/marketplace": ["Marketplace", "Integrações e canais de venda conectados"],
-  "/estoque": ["Estoque", "Controle de produtos e níveis de reposição"],
-  "/financeiro": ["Financeiro", "Fluxo de caixa, contas e resultado do período"],
-  "/pedidos": ["Pedidos", "Todos os pedidos de todas as plataformas"],
-  "/relatorios": ["Relatórios", "Relatórios consolidados da operação"],
-  "/cadastros": ["Cadastros", "Cadastro de clientes e fornecedores"],
-  "/configuracoes": ["Configurações", "Dados da empresa, usuários e integrações"],
-};
-
 function todayLabel() {
   const today = new Date();
   const label = today.toLocaleDateString("pt-BR", {
@@ -32,9 +22,8 @@ function todayLabel() {
 
 export function Topbar({ user }: { user: { name: string } }) {
   const pathname = usePathname();
-  const match = Object.keys(TITLES).find((key) => pathname?.startsWith(key));
-  const [title, subtitle] = match ? TITLES[match] : ["Dashboard", "Visão geral do negócio"];
-  const isDashboard = match === "/dashboard";
+  const { title, purpose: subtitle } = getPageInfo(pathname);
+  const isDashboard = pathname?.startsWith("/dashboard") ?? false;
 
   return (
     <header className="flex items-center justify-between border-b border-border bg-white/[0.01] px-8 py-5">

@@ -125,14 +125,17 @@ model Order {
   number       String      @unique
   customerName String
   platform     Platform
+  storeId      String?
   state        String?
   total        Decimal     @db.Decimal(10, 2)
   status       OrderStatus @default(PROCESSANDO)
   createdAt    DateTime    @default(now())
 
   items OrderItem[]
+  store Store?      @relation(fields: [storeId], references: [id])
 
   @@index([platform])
+  @@index([storeId])
   @@index([createdAt])
 }
 
@@ -147,16 +150,28 @@ model OrderItem {
   product Product @relation(fields: [productId], references: [id])
 }
 
-model PlatformIntegration {
+/// Uma conta/loja conectada num canal de venda. Uma mesma plataforma (ex.: Shopee)
+/// pode ter várias contas conectadas — uma por CNPJ/loja — daí não ser @unique em platform sozinho.
+model Store {
   id            String            @id @default(cuid())
-  platform      Platform          @unique
+  platform      Platform
   storeName     String
+  externalId    String?
   status        IntegrationStatus @default(DISCONNECTED)
   feePercentage Decimal           @db.Decimal(5, 2)
   credentials   Json?
   lastSyncedAt  DateTime?
+  /// Visitas do dia mais recente sincronizado (só Mercado Livre por enquanto — ver
+  /// lib/marketplace/mercadolivre-client.ts#fetchVisitsToday). Null = nunca sincronizado
+  /// ou plataforma sem API de visitas própria ainda.
+  visitsToday   Int?
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
+
+  orders Order[]
+
+  @@unique([platform, externalId])
+  @@index([platform])
 }
 
 model FinancialTransaction {

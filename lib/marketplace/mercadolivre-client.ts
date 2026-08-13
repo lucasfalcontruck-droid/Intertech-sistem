@@ -146,3 +146,28 @@ export async function fetchOrdersPage(
 export async function fetchRecentOrders(accessToken: string, sellerId: number, limit = 10) {
   return fetchOrdersPage(accessToken, sellerId, { limit });
 }
+
+interface VisitsTimeWindowResponse {
+  results: { date: string; total: number }[];
+}
+
+/**
+ * Visitas de hoje (GET /users/{id}/items_visits/time_window). O bucket é por
+ * dia UTC, não pelo dia civil de Brasília — pode ficar até ~3h defasado no
+ * limite da meia-noite, mas é o valor mais preciso que a API expõe sem somar
+ * hora a hora. Confirmado contra a API real: `results[0]` é o dia mais recente.
+ */
+export async function fetchVisitsToday(accessToken: string, sellerId: number): Promise<number> {
+  const url = new URL(`${API_BASE}/users/${sellerId}/items_visits/time_window`);
+  url.searchParams.set("last", "1");
+  url.searchParams.set("unit", "day");
+
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`Falha ao consultar visitas do Mercado Livre (${res.status}): ${body}`);
+  }
+
+  const data = (await res.json()) as VisitsTimeWindowResponse;
+  return data.results?.[0]?.total ?? 0;
+}

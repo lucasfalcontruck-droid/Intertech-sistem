@@ -10,7 +10,13 @@ import { Platform } from "@prisma/client";
 import { apiFetch } from "@/lib/api";
 import type { MarketplaceData } from "@/lib/types";
 
-/** Busca os cards de integração e a evolução de vendas por canal. */
+export interface StoreInput {
+  platform: Platform;
+  storeName: string;
+  feePercentage: number;
+}
+
+/** Busca os cards de integração (uma por loja conectada) e a evolução de vendas por canal. */
 export function useMarketplace() {
   return useQuery({
     queryKey: ["marketplace"],
@@ -18,15 +24,42 @@ export function useMarketplace() {
   });
 }
 
-/** Dispara a sincronização (real ou mock, conforme a plataforma) de um canal. */
+/** Dispara a sincronização (real ou mock, conforme a plataforma) de uma loja específica. */
 export function useSyncMarketplace() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (platform: Platform) =>
+    mutationFn: (storeId: string) =>
       apiFetch("/api/marketplace/sync", {
         method: "POST",
-        body: JSON.stringify({ platform }),
+        body: JSON.stringify({ storeId }),
       }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["marketplace"] });
+    },
+  });
+}
+
+/** Adiciona uma loja manualmente (Shopee, TikTok Shop ou Vendedor de Rua). */
+export function useAddStore() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: StoreInput) =>
+      apiFetch("/api/marketplace/stores", {
+        method: "POST",
+        body: JSON.stringify(input),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["marketplace"] });
+    },
+  });
+}
+
+/** Remove uma loja conectada. */
+export function useDeleteStore() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (storeId: string) =>
+      apiFetch(`/api/marketplace/stores?id=${encodeURIComponent(storeId)}`, { method: "DELETE" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["marketplace"] });
     },

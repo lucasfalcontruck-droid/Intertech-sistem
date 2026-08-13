@@ -9,7 +9,7 @@ import {
   useProducts,
   useUpdateProduct,
 } from "@/hooks/estoque/use-products";
-import { KpiCard } from "@/components/ui/kpi-card";
+import { HeroMetric, KpiRow } from "@/components/ui/hero-metric";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,17 +18,7 @@ import { Modal } from "@/components/ui/modal";
 import { ProductForm } from "@/components/estoque/product-form";
 import { CategoryBarChart } from "@/components/charts/category-bar-chart";
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/state";
-import {
-  IconBox,
-  IconRevenue,
-  IconAlertTriangle,
-  IconXCircle,
-  IconPlus,
-  IconSearch,
-  IconBoxTop,
-  IconPencil,
-  IconTrash,
-} from "@/components/ui/icons";
+import { IconPlus, IconSearch, IconPencil, IconTrash } from "@/components/ui/icons";
 import { formatCurrency, formatNumber } from "@/lib/utils";
 import type { Product } from "@/lib/types";
 import type { ProductFormInput } from "@/hooks/estoque/use-products";
@@ -94,13 +84,7 @@ export default function EstoquePage() {
 
   return (
     <div>
-      <div className="mb-5 flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-bold text-ink">Estoque</h2>
-          <p className="mt-1 text-[12.5px] text-ink-secondary">
-            Controle de produtos, quantidades e reposição
-          </p>
-        </div>
+      <div className="mb-5 flex justify-end">
         <Button variant="primary" onClick={openCreate}>
           <IconPlus className="h-3.5 w-3.5" />
           Novo produto
@@ -114,28 +98,22 @@ export default function EstoquePage() {
 
       {summaryQuery.data && (
         <>
-          <div className="mb-5 grid grid-cols-4 gap-4">
-            <KpiCard
-              icon={<IconBox className="h-[19px] w-[19px]" />}
-              value={formatNumber(summaryQuery.data.summary.totalSkus)}
-              label="SKUs cadastrados"
-            />
-            <KpiCard
-              icon={<IconRevenue className="h-[19px] w-[19px]" />}
-              value={formatCurrency(summaryQuery.data.summary.totalStockValue)}
-              label="Valor total em estoque"
-            />
-            <KpiCard
-              icon={<IconAlertTriangle className="h-[19px] w-[19px]" />}
-              value={formatNumber(summaryQuery.data.summary.lowStockCount)}
-              label="Itens com estoque baixo"
-            />
-            <KpiCard
-              icon={<IconXCircle className="h-[19px] w-[19px]" />}
-              value={formatNumber(summaryQuery.data.summary.outOfStockCount)}
-              label="Itens sem estoque"
-            />
-          </div>
+          <HeroMetric
+            label="Valor total em estoque"
+            value={formatCurrency(summaryQuery.data.summary.totalStockValue)}
+          />
+          <KpiRow
+            items={[
+              { label: "SKUs cadastrados", value: formatNumber(summaryQuery.data.summary.totalSkus) },
+              { label: "Estoque baixo", value: formatNumber(summaryQuery.data.summary.lowStockCount) },
+              {
+                label: "Sem estoque",
+                value: formatNumber(summaryQuery.data.summary.outOfStockCount),
+                valueClassName: summaryQuery.data.summary.outOfStockCount > 0 ? "text-danger" : undefined,
+                flag: summaryQuery.data.summary.outOfStockCount > 0 ? "necessita ação" : undefined,
+              },
+            ]}
+          />
 
           <div className="mb-4 flex items-center gap-2.5">
             <div className="flex max-w-[280px] flex-1 items-center gap-2 rounded-[10px] border border-border bg-card px-3 py-2.5">
@@ -212,14 +190,9 @@ export default function EstoquePage() {
                         className="border-b border-white/4 last:border-none hover:bg-white/2"
                       >
                         <td className="px-3 py-3.5">
-                          <div className="flex items-center gap-2.5">
-                            <div className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-lg border border-border bg-card-2 text-ink-muted">
-                              <IconBoxTop className="h-4 w-4" />
-                            </div>
-                            <div>
-                              <div className="text-sm font-semibold text-ink">{p.name}</div>
-                              <div className="text-[11px] text-ink-muted">{p.sku}</div>
-                            </div>
+                          <div>
+                            <div className="text-sm font-semibold text-ink">{p.name}</div>
+                            <div className="text-[11px] text-ink-muted">{p.sku}</div>
                           </div>
                         </td>
                         <td className="px-3 py-3.5 text-sm text-ink-secondary">{p.category}</td>

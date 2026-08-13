@@ -1,9 +1,9 @@
 /**
- * lib/marketplace/mercadolivre-auth.ts — Guarda o access/refresh token do
- * Mercado Livre no banco (PlatformIntegration) e renova automaticamente
- * quando expira, para as outras rotinas não precisarem se preocupar com isso.
+ * lib/marketplace/mercadolivre-auth.ts — Guarda o access/refresh token de
+ * cada loja do Mercado Livre conectada (uma linha por conta em Store) e
+ * renova automaticamente quando expira, para as outras rotinas não
+ * precisarem se preocupar com isso.
  */
-import { Platform } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { refreshTokens, type MercadoLivreTokens } from "./mercadolivre-client";
 
@@ -17,17 +17,15 @@ interface StoredCredentials {
 
 const EXPIRY_BUFFER_MS = 60_000;
 
-/** Returns a valid access token for Mercado Livre, refreshing and persisting it if expired. */
-export async function getValidMercadoLivreCredentials(): Promise<StoredCredentials> {
-  const integration = await prisma.platformIntegration.findUnique({
-    where: { platform: Platform.MERCADO_LIVRE },
-  });
+/** Returns a valid access token for a specific connected Mercado Livre store, refreshing and persisting it if expired. */
+export async function getValidMercadoLivreCredentials(storeId: string): Promise<StoredCredentials> {
+  const store = await prisma.store.findUnique({ where: { id: storeId } });
 
-  if (!integration || integration.status !== "CONNECTED" || !integration.credentials) {
-    throw new Error("Mercado Livre não está conectado. Conecte a loja primeiro.");
+  if (!store || store.status !== "CONNECTED" || !store.credentials) {
+    throw new Error("Esta loja do Mercado Livre não está conectada.");
   }
 
-  const creds = integration.credentials as unknown as StoredCredentials;
+  const creds = store.credentials as unknown as StoredCredentials;
 
   if (creds.expiresAt - EXPIRY_BUFFER_MS > Date.now()) {
     return creds;
@@ -42,8 +40,8 @@ export async function getValidMercadoLivreCredentials(): Promise<StoredCredentia
     siteId: creds.siteId,
   };
 
-  await prisma.platformIntegration.update({
-    where: { platform: Platform.MERCADO_LIVRE },
+  await prisma.store.update({
+    where: { id: storeId },
     data: { credentials: { ...updated } },
   });
 

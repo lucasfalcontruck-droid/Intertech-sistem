@@ -6,6 +6,7 @@ import type { OrderStatus, Platform } from "@prisma/client";
 
 export interface SalesSummary {
   platform: Platform;
+  storeId: string;
   totalSales: number;
   orderCount: number;
   averageTicket: number;
@@ -18,6 +19,7 @@ export interface MarketplaceOrder {
   number: string;
   customerName: string;
   platform: Platform;
+  storeId: string | null;
   total: number;
   status: OrderStatus;
   createdAt: Date;
@@ -25,6 +27,7 @@ export interface MarketplaceOrder {
 
 export interface SyncResult {
   platform: Platform;
+  storeId: string;
   syncedAt: Date;
   ordersSynced: number;
   productsSynced: number;
@@ -44,6 +47,7 @@ export interface GetOrdersParams {
  */
 export interface MarketplaceAdapter {
   platform: Platform;
+  storeId: string;
   getSales(periodStart: Date, periodEnd: Date): Promise<SalesSummary>;
   getOrders(params?: GetOrdersParams): Promise<MarketplaceOrder[]>;
   syncInventory(): Promise<SyncResult>;

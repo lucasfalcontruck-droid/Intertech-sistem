@@ -169,7 +169,10 @@ function randomOrderStatus(createdAt: Date): OrderStatus {
 // Static reference data (matches spec section 5)
 // ---------------------------------------------------------------------------
 
-const PLATFORM_INTEGRATIONS: {
+// Cada plataforma pode ter mais de uma loja/conta conectada (CNPJs diferentes).
+// Os valores de cada dupla somam exatamente o total que a plataforma tinha antes
+// (ex.: as duas lojas do Mercado Livre somam os mesmos 218_400 / 1428 pedidos).
+const STORES: {
   platform: Platform;
   storeName: string;
   feePercentage: number;
@@ -181,25 +184,49 @@ const PLATFORM_INTEGRATIONS: {
     platform: Platform.MERCADO_LIVRE,
     storeName: "intertech.oficial",
     feePercentage: 14.5,
-    monthlyRevenue: 218_400,
-    monthlyOrders: 1428,
-    weeklyRevenue: [52_000, 58_000, 54_000, 54_400],
+    monthlyRevenue: 141_900,
+    monthlyOrders: 928,
+    weeklyRevenue: [34_000, 37_500, 35_000, 35_400],
+  },
+  {
+    platform: Platform.MERCADO_LIVRE,
+    storeName: "intertech.outlet",
+    feePercentage: 14.5,
+    monthlyRevenue: 76_500,
+    monthlyOrders: 500,
+    weeklyRevenue: [18_000, 20_500, 19_000, 19_000],
   },
   {
     platform: Platform.SHOPEE,
     storeName: "Intertech Store BR",
     feePercentage: 16,
-    monthlyRevenue: 155_600,
-    monthlyOrders: 2014,
-    weeklyRevenue: [36_000, 39_000, 40_500, 40_100],
+    monthlyRevenue: 85_600,
+    monthlyOrders: 1108,
+    weeklyRevenue: [19_800, 21_500, 22_300, 22_000],
+  },
+  {
+    platform: Platform.SHOPEE,
+    storeName: "Intertech Store Sul",
+    feePercentage: 16,
+    monthlyRevenue: 70_000,
+    monthlyOrders: 906,
+    weeklyRevenue: [16_200, 17_500, 18_200, 18_100],
   },
   {
     platform: Platform.TIKTOK_SHOP,
     storeName: "@intertech.br",
     feePercentage: 10,
-    monthlyRevenue: 112_200,
-    monthlyOrders: 986,
-    weeklyRevenue: [24_000, 27_500, 29_200, 31_500],
+    monthlyRevenue: 78_600,
+    monthlyOrders: 690,
+    weeklyRevenue: [16_800, 19_300, 20_500, 22_000],
+  },
+  {
+    platform: Platform.TIKTOK_SHOP,
+    storeName: "@intertech.promo",
+    feePercentage: 10,
+    monthlyRevenue: 33_600,
+    monthlyOrders: 296,
+    weeklyRevenue: [7_200, 8_200, 8_700, 9_500],
   },
 ];
 
@@ -570,7 +597,7 @@ async function main() {
   await prisma.productChannel.deleteMany();
   await prisma.product.deleteMany();
   await prisma.financialTransaction.deleteMany();
-  await prisma.platformIntegration.deleteMany();
+  await prisma.store.deleteMany();
   await prisma.pedidoCompra.deleteMany();
   await prisma.fornecedor.deleteMany();
   await prisma.cliente.deleteMany();
@@ -593,18 +620,20 @@ async function main() {
     },
   });
 
-  console.log("Criando integrações de marketplace...");
-  for (const integ of PLATFORM_INTEGRATIONS) {
-    await prisma.platformIntegration.create({
+  console.log("Criando lojas conectadas (uma ou mais por plataforma)...");
+  const storeIds = new Map<string, string>(); // storeName -> id
+  for (const s of STORES) {
+    const created = await prisma.store.create({
       data: {
-        platform: integ.platform,
-        storeName: integ.storeName,
+        platform: s.platform,
+        storeName: s.storeName,
         status: "CONNECTED",
-        feePercentage: integ.feePercentage,
+        feePercentage: s.feePercentage,
         lastSyncedAt: randomDateBetween(daysAgo(1), new Date()),
         credentials: { apiKey: "mock-key", note: "Integração simulada — sem chamadas reais." },
       },
     });
+    storeIds.set(s.storeName, created.id);
   }
 
   console.log("Criando produtos e canais...");
@@ -656,6 +685,7 @@ async function main() {
     id: string;
     customerName: string;
     platform: Platform;
+    storeId: string;
     total: number;
     createdAt: Date;
   };
@@ -669,15 +699,13 @@ async function main() {
   });
   weekBounds[weekBounds.length - 1].end = now;
 
-  for (const integ of PLATFORM_INTEGRATIONS) {
-    const weekOrderCounts = distributeInt(
-      integ.monthlyOrders,
-      integ.weeklyRevenue as unknown as number[],
-    );
+  for (const s of STORES) {
+    const storeId = storeIds.get(s.storeName)!;
+    const weekOrderCounts = distributeInt(s.monthlyOrders, s.weeklyRevenue as unknown as number[]);
 
     for (let w = 0; w < WEEKS; w++) {
       const count = weekOrderCounts[w];
-      const revenueTarget = integ.weeklyRevenue[w];
+      const revenueTarget = s.weeklyRevenue[w];
       const amounts = splitAmount(count, revenueTarget);
       const { start, end } = weekBounds[w];
 
@@ -685,7 +713,8 @@ async function main() {
         pendingOrders.push({
           id: randomUUID(),
           customerName: randomCustomerName(),
-          platform: integ.platform,
+          platform: s.platform,
+          storeId,
           total: amounts[i],
           createdAt: randomDateBetween(start, end),
         });
@@ -702,6 +731,7 @@ async function main() {
     number: orderNumbers[idx],
     customerName: o.customerName,
     platform: o.platform,
+    storeId: o.storeId,
     state: randomState(),
     total: o.total,
     status: randomOrderStatus(o.createdAt),
@@ -871,7 +901,7 @@ async function main() {
 
   // Current month's settled cash inflow, mirroring the live order revenue total
   // (218_400 + 155_600 + 112_200), so "Saldo em caixa" reflects real cash received.
-  const currentMonthRevenue = PLATFORM_INTEGRATIONS.reduce((sum, p) => sum + p.monthlyRevenue, 0);
+  const currentMonthRevenue = STORES.reduce((sum, s) => sum + s.monthlyRevenue, 0);
   await prisma.financialTransaction.create({
     data: {
       type: TransactionType.ENTRADA,

@@ -9,19 +9,24 @@ import type {
 } from "./types";
 
 /**
- * Mock/seed-backed implementation shared by all three channels. Each
+ * Mock/seed-backed implementation shared by every channel that doesn't have a
+ * real API integration yet. Bound to one specific connected store (not just a
+ * platform), since a platform can have more than one account connected. Each
  * platform-specific adapter only sets its `platform`; the data access here
  * reads from our own database, which stands in for the platform's real API
  * response until real credentials are wired up.
  */
 export class SeedBackedMarketplaceAdapter implements MarketplaceAdapter {
-  constructor(public readonly platform: Platform) {}
+  constructor(
+    public readonly platform: Platform,
+    public readonly storeId: string,
+  ) {}
 
-  /** Soma vendas e calcula ticket médio a partir dos pedidos locais no período. */
+  /** Soma vendas e calcula ticket médio a partir dos pedidos locais dessa loja no período. */
   async getSales(periodStart: Date, periodEnd: Date): Promise<SalesSummary> {
     const orders = await prisma.order.findMany({
       where: {
-        platform: this.platform,
+        storeId: this.storeId,
         createdAt: { gte: periodStart, lte: periodEnd },
       },
       select: { total: true },
@@ -32,6 +37,7 @@ export class SeedBackedMarketplaceAdapter implements MarketplaceAdapter {
 
     return {
       platform: this.platform,
+      storeId: this.storeId,
       totalSales,
       orderCount,
       averageTicket: orderCount > 0 ? totalSales / orderCount : 0,
@@ -40,11 +46,11 @@ export class SeedBackedMarketplaceAdapter implements MarketplaceAdapter {
     };
   }
 
-  /** Lista pedidos locais dessa plataforma, mais recentes primeiro. */
+  /** Lista pedidos locais dessa loja, mais recentes primeiro. */
   async getOrders(params: GetOrdersParams = {}): Promise<MarketplaceOrder[]> {
     const orders = await prisma.order.findMany({
       where: {
-        platform: this.platform,
+        storeId: this.storeId,
         ...(params.since ? { createdAt: { gte: params.since } } : {}),
       },
       orderBy: { createdAt: "desc" },
@@ -56,6 +62,7 @@ export class SeedBackedMarketplaceAdapter implements MarketplaceAdapter {
       number: o.number,
       customerName: o.customerName,
       platform: o.platform,
+      storeId: o.storeId,
       total: Number(o.total),
       status: o.status,
       createdAt: o.createdAt,
@@ -65,19 +72,20 @@ export class SeedBackedMarketplaceAdapter implements MarketplaceAdapter {
   /** Mock: só recontabiliza o que já existe localmente (não busca nada externo). */
   async syncInventory(): Promise<SyncResult> {
     const [ordersSynced, productsSynced] = await Promise.all([
-      prisma.order.count({ where: { platform: this.platform } }),
+      prisma.order.count({ where: { storeId: this.storeId } }),
       prisma.productChannel.count({ where: { platform: this.platform } }),
     ]);
 
     const syncedAt = new Date();
 
-    await prisma.platformIntegration.update({
-      where: { platform: this.platform },
+    await prisma.store.update({
+      where: { id: this.storeId },
       data: { lastSyncedAt: syncedAt },
     });
 
     return {
       platform: this.platform,
+      storeId: this.storeId,
       syncedAt,
       ordersSynced,
       productsSynced,

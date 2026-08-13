@@ -1,4 +1,4 @@
-import { Platform } from "@prisma/client";
+import { OrderStatus, Platform } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { REPORTING_WINDOW_DAYS } from "@/lib/constants";
 import { startOfDay, subDays } from "@/lib/reporting";
@@ -9,6 +9,9 @@ import { getCashFlowHistory } from "./financeiro";
  * ticket médio, desempenho por anúncio, vendas por estado e o painel ao
  * vivo de vendas do Mercado Livre.
  */
+
+/** Pedidos cancelados não contam como venda em nenhum relatório. */
+const NOT_CANCELLED = { status: { not: OrderStatus.CANCELADO } } as const;
 
 const ALL_PLATFORMS: Platform[] = [
   Platform.MERCADO_LIVRE,
@@ -41,9 +44,9 @@ export async function getCanalPerformance() {
   const windowStart = subDays(new Date(), REPORTING_WINDOW_DAYS);
 
   const [integrations, orders, channelViews, allProducts] = await Promise.all([
-    prisma.platformIntegration.findMany(),
+    prisma.store.findMany(),
     prisma.order.findMany({
-      where: { createdAt: { gte: windowStart } },
+      where: { ...NOT_CANCELLED, createdAt: { gte: windowStart } },
       include: { items: true },
     }),
     prisma.productChannel.findMany({ include: { product: { select: { adViews: true } } } }),
@@ -108,7 +111,7 @@ export async function getCanalPerformance() {
 export async function getTicketMedioGeral() {
   const windowStart = subDays(new Date(), REPORTING_WINDOW_DAYS);
   const orders = await prisma.order.findMany({
-    where: { createdAt: { gte: windowStart } },
+    where: { ...NOT_CANCELLED, createdAt: { gte: windowStart } },
     select: { total: true },
   });
   const total = orders.reduce((s, o) => s + Number(o.total), 0);
@@ -119,7 +122,7 @@ export async function getTicketMedioGeral() {
 export async function getTicketMedioPorProduto(take = 8) {
   const windowStart = subDays(new Date(), REPORTING_WINDOW_DAYS);
   const items = await prisma.orderItem.findMany({
-    where: { order: { createdAt: { gte: windowStart } } },
+    where: { order: { ...NOT_CANCELLED, createdAt: { gte: windowStart } } },
     select: { unitPrice: true, quantity: true, product: { select: { id: true, name: true } } },
   });
 
@@ -144,7 +147,7 @@ export async function getVendasPorAnuncio(take = 10) {
   const products = await prisma.product.findMany({
     include: {
       channels: true,
-      orderItems: { where: { order: { createdAt: { gte: windowStart } } } },
+      orderItems: { where: { order: { ...NOT_CANCELLED, createdAt: { gte: windowStart } } } },
     },
   });
 
@@ -163,7 +166,7 @@ export async function getVendasPorAnuncio(take = 10) {
 /** Total de pedidos e valor vendido agrupados por estado (UF) do cliente. */
 export async function getVendaPorEstado() {
   const orders = await prisma.order.findMany({
-    where: { state: { not: null } },
+    where: { ...NOT_CANCELLED, state: { not: null } },
     select: { state: true, total: true },
   });
 
@@ -194,7 +197,7 @@ export async function getPainelAoVivoMercadoLivre() {
 
   const [todayOrders, recentOrders] = await Promise.all([
     prisma.order.findMany({
-      where: { platform: Platform.MERCADO_LIVRE, createdAt: { gte: todayStart } },
+      where: { ...NOT_CANCELLED, platform: Platform.MERCADO_LIVRE, createdAt: { gte: todayStart } },
       select: { total: true },
     }),
     prisma.order.findMany({

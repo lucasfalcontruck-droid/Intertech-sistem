@@ -1,30 +1,34 @@
 /**
  * lib/marketplace/index.ts — Ponto único de acesso aos adaptadores de
- * marketplace. Mercado Livre usa o adaptador real (API); Shopee e TikTok
- * Shop ainda usam o adaptador mock/seed até terem integração de verdade.
+ * marketplace. Cada loja conectada (Store) tem seu próprio adaptador —
+ * Mercado Livre usa o adaptador real (API); as demais plataformas ainda
+ * usam o adaptador mock/seed até terem integração de verdade.
  */
 import { Platform } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { SeedBackedMarketplaceAdapter } from "./base-adapter";
 import { MercadoLivreMarketplaceAdapter } from "./mercadolivre-adapter";
 import type { MarketplaceAdapter } from "./types";
 
 export * from "./types";
 
-const adapters: Record<Platform, MarketplaceAdapter> = {
-  [Platform.MERCADO_LIVRE]: new MercadoLivreMarketplaceAdapter(),
-  [Platform.SHOPEE]: new SeedBackedMarketplaceAdapter(Platform.SHOPEE),
-  [Platform.TIKTOK_SHOP]: new SeedBackedMarketplaceAdapter(Platform.TIKTOK_SHOP),
-  // Vendedor de Rua não tem sync — os pedidos chegam via app/api/integrations/vendedor
-  // (a integração empurra o pedido pra cá, em vez de a gente puxar de algum lugar).
-  [Platform.VENDEDOR_RUA]: new SeedBackedMarketplaceAdapter(Platform.VENDEDOR_RUA),
-};
-
-/** Retorna o adaptador (real ou mock) responsável por uma plataforma. */
-export function getMarketplaceAdapter(platform: Platform): MarketplaceAdapter {
-  return adapters[platform];
+/** Retorna o adaptador (real ou mock) responsável por uma loja específica. */
+export function getMarketplaceAdapter(store: { id: string; platform: Platform }): MarketplaceAdapter {
+  if (store.platform === Platform.MERCADO_LIVRE) {
+    return new MercadoLivreMarketplaceAdapter(store.id);
+  }
+  return new SeedBackedMarketplaceAdapter(store.platform, store.id);
 }
 
-/** Retorna todos os adaptadores registrados, para rotinas que percorrem todas as plataformas. */
-export function getAllMarketplaceAdapters(): MarketplaceAdapter[] {
-  return Object.values(adapters);
+/** Busca uma loja pelo id e retorna o adaptador correspondente. */
+export async function getMarketplaceAdapterByStoreId(storeId: string): Promise<MarketplaceAdapter> {
+  const store = await prisma.store.findUnique({ where: { id: storeId } });
+  if (!store) throw new Error("Loja não encontrada.");
+  return getMarketplaceAdapter(store);
+}
+
+/** Retorna os adaptadores de todas as lojas conectadas de uma plataforma (para rotinas que sincronizam tudo). */
+export async function getMarketplaceAdaptersForPlatform(platform: Platform): Promise<MarketplaceAdapter[]> {
+  const stores = await prisma.store.findMany({ where: { platform, status: "CONNECTED" } });
+  return stores.map((store) => getMarketplaceAdapter(store));
 }

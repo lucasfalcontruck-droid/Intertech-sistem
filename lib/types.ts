@@ -36,9 +36,11 @@ export interface DashboardData {
 
 // --- Marketplace ---
 export interface IntegrationCard {
+  id: string;
   platform: Platform;
   storeName: string;
   status: "CONNECTED" | "DISCONNECTED";
+  isReal: boolean;
   feePercentage: number;
   lastSyncedAt: string | null;
   sales: number;

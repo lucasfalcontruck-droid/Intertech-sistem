@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 export interface OrderFilters {
   search?: string;
   platform?: Platform;
+  storeId?: string;
   status?: OrderStatus;
   dateFrom?: Date;
   dateTo?: Date;
@@ -28,6 +29,7 @@ export async function listOrders(filters: OrderFilters = {}) {
         }
       : {}),
     ...(filters.platform ? { platform: filters.platform } : {}),
+    ...(filters.storeId ? { storeId: filters.storeId } : {}),
     ...(filters.status ? { status: filters.status } : {}),
     ...(filters.dateFrom || filters.dateTo
       ? {

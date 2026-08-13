@@ -10,9 +10,11 @@ import { apiFetch } from "@/lib/api";
 export interface ConfiguracoesData {
   users: { id: string; name: string; email: string; role: string; createdAt: string }[];
   integrations: {
+    id: string;
     platform: string;
     storeName: string;
     status: string;
+    isReal: boolean;
     feePercentage: number;
     lastSyncedAt: string | null;
   }[];

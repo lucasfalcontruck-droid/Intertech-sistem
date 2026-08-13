@@ -107,11 +107,23 @@ export default function ConfiguracoesPage() {
               </thead>
               <tbody>
                 {data.integrations.map((integ) => (
-                  <tr key={integ.platform} className="border-b border-white/4 last:border-none">
+                  <tr key={integ.id} className="border-b border-white/4 last:border-none">
                     <td className="px-3 py-3 text-sm font-medium text-ink">
                       {PLATFORM_LABEL[integ.platform as Platform]}
                     </td>
-                    <td className="px-3 py-3 text-sm text-ink-secondary">{integ.storeName}</td>
+                    <td className="px-3 py-3 text-sm text-ink-secondary">
+                      <div className="flex items-center gap-2">
+                        {integ.storeName}
+                        {!integ.isReal && (
+                          <span
+                            title="Loja de demonstração — não veio de um login real"
+                            className="rounded-full bg-warning/12 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-warning"
+                          >
+                            Demonstração
+                          </span>
+                        )}
+                      </div>
+                    </td>
                     <td className="px-3 py-3 text-sm text-ink-secondary">
                       {formatPercent(integ.feePercentage)}
                     </td>

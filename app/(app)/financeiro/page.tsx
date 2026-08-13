@@ -8,7 +8,7 @@ import {
   useFinanceiroSummary,
   useUpdateTransaction,
 } from "@/hooks/financeiro/use-transactions";
-import { KpiCard } from "@/components/ui/kpi-card";
+import { HeroMetric, KpiRow } from "@/components/ui/hero-metric";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
@@ -16,14 +16,7 @@ import { TransactionForm } from "@/components/financeiro/transaction-form";
 import { TransactionTable } from "@/components/financeiro/transaction-table";
 import { CashFlowChart } from "@/components/charts/cash-flow-chart";
 import { LoadingState, ErrorState } from "@/components/ui/state";
-import {
-  IconTrendUp,
-  IconTrendDown,
-  IconRevenue,
-  IconCash,
-  IconPlus,
-  IconExport,
-} from "@/components/ui/icons";
+import { IconPlus, IconExport } from "@/components/ui/icons";
 import { formatCurrency } from "@/lib/utils";
 import type { TransactionFormInput } from "@/hooks/financeiro/use-transactions";
 
@@ -58,23 +51,15 @@ export default function FinanceiroPage() {
 
   return (
     <div>
-      <div className="mb-5 flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-bold text-ink">Financeiro</h2>
-          <p className="mt-1 text-[12.5px] text-ink-secondary">
-            Fluxo de caixa, contas e resultado do período
-          </p>
-        </div>
-        <div className="flex gap-2.5">
-          <Button variant="secondary" onClick={() => openCreate(TransactionType.ENTRADA)}>
-            <IconPlus className="h-3.5 w-3.5" />
-            Nova transação
-          </Button>
-          <Button variant="primary">
-            <IconExport className="h-3.5 w-3.5" />
-            Exportar DRE
-          </Button>
-        </div>
+      <div className="mb-5 flex justify-end gap-2.5">
+        <Button variant="secondary" onClick={() => openCreate(TransactionType.ENTRADA)}>
+          <IconPlus className="h-3.5 w-3.5" />
+          Nova transação
+        </Button>
+        <Button variant="primary">
+          <IconExport className="h-3.5 w-3.5" />
+          Exportar DRE
+        </Button>
       </div>
 
       {isLoading && <LoadingState label="Carregando financeiro..." />}
@@ -82,28 +67,18 @@ export default function FinanceiroPage() {
 
       {data && (
         <>
-          <div className="mb-5 grid grid-cols-4 gap-4">
-            <KpiCard
-              icon={<IconTrendUp className="h-[19px] w-[19px]" />}
-              value={formatCurrency(data.kpis.revenueMonth)}
-              label="Receita do mês"
-            />
-            <KpiCard
-              icon={<IconTrendDown className="h-[19px] w-[19px]" />}
-              value={formatCurrency(data.kpis.expensesMonth)}
-              label="Despesas do mês"
-            />
-            <KpiCard
-              icon={<IconRevenue className="h-[19px] w-[19px]" />}
-              value={formatCurrency(data.kpis.netProfit)}
-              label="Lucro líquido"
-            />
-            <KpiCard
-              icon={<IconCash className="h-[19px] w-[19px]" />}
-              value={formatCurrency(data.kpis.cashBalance)}
-              label="Saldo em caixa"
-            />
-          </div>
+          <HeroMetric label="Saldo em caixa" value={formatCurrency(data.kpis.cashBalance)} />
+          <KpiRow
+            items={[
+              { label: "Receita do mês", value: formatCurrency(data.kpis.revenueMonth) },
+              { label: "Despesas do mês", value: formatCurrency(data.kpis.expensesMonth) },
+              {
+                label: "Lucro líquido",
+                value: formatCurrency(data.kpis.netProfit),
+                valueClassName: data.kpis.netProfit < 0 ? "text-danger" : undefined,
+              },
+            ]}
+          />
 
           <Card className="mb-4">
             <CardHeader title="Fluxo de caixa" subtitle="Entradas vs. saídas — últimos 6 meses" />

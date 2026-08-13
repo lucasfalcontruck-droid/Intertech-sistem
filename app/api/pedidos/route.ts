@@ -9,6 +9,7 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const search = searchParams.get("search") ?? undefined;
   const platform = (searchParams.get("platform") as Platform | null) ?? undefined;
+  const storeId = searchParams.get("storeId") ?? undefined;
   const status = (searchParams.get("status") as OrderStatus | null) ?? undefined;
   const dateFromParam = searchParams.get("dateFrom");
   const dateToParam = searchParams.get("dateTo");
@@ -16,7 +17,7 @@ export async function GET(req: NextRequest) {
   const dateTo = dateToParam ? new Date(`${dateToParam}T23:59:59.999`) : undefined;
 
   try {
-    const data = await listOrders({ search, platform, status, dateFrom, dateTo });
+    const data = await listOrders({ search, platform, storeId, status, dateFrom, dateTo });
     return NextResponse.json(data);
   } catch (error) {
     console.error(error);

@@ -3,10 +3,11 @@
 import { useMemo, useState } from "react";
 import { OrderStatus, Platform } from "@prisma/client";
 import { usePedidos } from "@/hooks/pedidos/use-pedidos";
+import { useMarketplace } from "@/hooks/marketplace/use-marketplace";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { Card } from "@/components/ui/card";
 import { Badge, type BadgeVariant } from "@/components/ui/badge";
-import { PlatformChip } from "@/components/ui/platform-chip";
+import { PlatformChip, PLATFORM_LABEL } from "@/components/ui/platform-chip";
 import { IconSearch } from "@/components/ui/icons";
 import { LoadingState, ErrorState, EmptyState } from "@/components/ui/state";
 import { formatCurrency, formatDateTime, formatNumber } from "@/lib/utils";
@@ -23,18 +24,21 @@ export default function PedidosPage() {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebouncedValue(search, 300);
   const [platform, setPlatform] = useState("");
+  const [storeId, setStoreId] = useState("");
   const [status, setStatus] = useState("");
 
   const filters = useMemo(
     () => ({
       search: debouncedSearch || undefined,
       platform: platform || undefined,
+      storeId: storeId || undefined,
       status: status || undefined,
     }),
-    [debouncedSearch, platform, status],
+    [debouncedSearch, platform, storeId, status],
   );
 
   const { data, isLoading, isError, error } = usePedidos(filters);
+  const { data: marketplaceData } = useMarketplace();
 
   return (
     <div>
@@ -64,6 +68,18 @@ export default function PedidosPage() {
           {Object.values(Platform).map((p) => (
             <option key={p} value={p}>
               {p.replace("_", " ")}
+            </option>
+          ))}
+        </select>
+        <select
+          value={storeId}
+          onChange={(e) => setStoreId(e.target.value)}
+          className="rounded-[10px] border border-border bg-card px-3 py-2.5 text-[12.5px] text-ink outline-none"
+        >
+          <option value="">Todas as lojas</option>
+          {marketplaceData?.integrationCards.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.storeName} · {PLATFORM_LABEL[s.platform]}
             </option>
           ))}
         </select>

@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { Platform } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { PLATFORM_COLOR, PLATFORM_LABEL, PLATFORM_SHORT } from "@/components/ui/platform-chip";
-import { IconRefresh, IconSettings, IconCheck } from "@/components/ui/icons";
+import { IconRefresh, IconSettings, IconCheck, IconTrash } from "@/components/ui/icons";
 import { formatCurrency, formatNumber, formatPercent } from "@/lib/utils";
 import type { IntegrationCard as IntegrationCardData } from "@/lib/types";
 
@@ -13,16 +13,16 @@ import type { IntegrationCard as IntegrationCardData } from "@/lib/types";
  * (Mercado Livre/Shopee/TikTok Shop) na tela Marketplace, com botões de
  * Sincronizar, Configurar (leva ao OAuth do ML) e Testar conexão real.
  */
-const ICON_STYLE: Record<Platform, React.CSSProperties> = {
-  MERCADO_LIVRE: { background: PLATFORM_COLOR.MERCADO_LIVRE, color: "#0a0a0a" },
-  SHOPEE: { background: PLATFORM_COLOR.SHOPEE, color: "#fff" },
-  TIKTOK_SHOP: {
-    background: "#111",
-    color: PLATFORM_COLOR.TIKTOK_SHOP,
-    border: `1px solid ${PLATFORM_COLOR.TIKTOK_SHOP}`,
-  },
-  VENDEDOR_RUA: { background: PLATFORM_COLOR.VENDEDOR_RUA, color: "#1a0a12" },
-};
+const ICON_STYLE: Record<Platform, React.CSSProperties> = Object.fromEntries(
+  (Object.keys(PLATFORM_COLOR) as Platform[]).map((platform) => [
+    platform,
+    {
+      background: "rgba(255,255,255,0.05)",
+      color: PLATFORM_COLOR[platform],
+      border: `1px solid ${PLATFORM_COLOR[platform]}`,
+    },
+  ]),
+) as Record<Platform, React.CSSProperties>;
 
 export function IntegrationCard({
   data,
@@ -31,6 +31,7 @@ export function IntegrationCard({
   configureHref,
   onTest,
   testing,
+  onDelete,
 }: {
   data: IntegrationCardData;
   onSync: () => void;
@@ -38,6 +39,7 @@ export function IntegrationCard({
   configureHref?: string;
   onTest?: () => void;
   testing?: boolean;
+  onDelete?: () => void;
 }) {
   return (
     <div className="relative rounded-2xl border border-border bg-card p-5">
@@ -48,21 +50,43 @@ export function IntegrationCard({
         >
           {PLATFORM_SHORT[data.platform]}
         </div>
-        {data.status === "CONNECTED" ? (
-          <span className="flex items-center gap-1.5 text-[11.5px] font-semibold text-success">
-            <span className="h-[7px] w-[7px] rounded-full bg-success shadow-[0_0_0_3px_rgba(34,197,94,0.2)]" />
-            Conectado
-          </span>
-        ) : (
-          <span className="flex items-center gap-1.5 text-[11.5px] font-semibold text-ink-muted">
-            <span className="h-[7px] w-[7px] rounded-full bg-ink-muted" />
-            Desconectado
+        <div className="flex items-center gap-2.5">
+          {data.status === "CONNECTED" ? (
+            <span className="flex items-center gap-1.5 text-[11.5px] font-semibold text-success">
+              <span className="h-[7px] w-[7px] rounded-full bg-success shadow-[0_0_0_3px_rgba(34,197,94,0.2)]" />
+              Conectado
+            </span>
+          ) : (
+            <span className="flex items-center gap-1.5 text-[11.5px] font-semibold text-ink-muted">
+              <span className="h-[7px] w-[7px] rounded-full bg-ink-muted" />
+              Desconectado
+            </span>
+          )}
+          {onDelete && (
+            <button
+              onClick={onDelete}
+              title="Remover loja"
+              aria-label="Remover loja"
+              className="flex h-6 w-6 items-center justify-center rounded-md text-ink-muted hover:bg-danger/10 hover:text-danger"
+            >
+              <IconTrash className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="mb-0.5 flex items-center gap-2">
+        <span className="text-[15px] font-bold text-ink">{data.storeName}</span>
+        {!data.isReal && (
+          <span
+            title="Loja de demonstração — não veio de um login real"
+            className="rounded-full bg-warning/12 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-warning"
+          >
+            Demonstração
           </span>
         )}
       </div>
-
-      <div className="mb-0.5 text-[15px] font-bold text-ink">{PLATFORM_LABEL[data.platform]}</div>
-      <div className="mb-2.5 text-[11.5px] text-ink-muted">Loja: {data.storeName}</div>
+      <div className="mb-2.5 text-[11.5px] text-ink-muted">{PLATFORM_LABEL[data.platform]}</div>
 
       <div className="flex justify-between border-b border-white/5 py-2.5 text-[12.5px]">
         <span className="text-ink-secondary">Vendas (mês)</span>

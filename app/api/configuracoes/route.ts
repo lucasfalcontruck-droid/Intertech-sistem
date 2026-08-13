@@ -11,15 +11,17 @@ export async function GET() {
         select: { id: true, name: true, email: true, role: true, createdAt: true },
         orderBy: { createdAt: "asc" },
       }),
-      prisma.platformIntegration.findMany({ orderBy: { platform: "asc" } }),
+      prisma.store.findMany({ orderBy: [{ platform: "asc" }, { createdAt: "asc" }] }),
     ]);
 
     return NextResponse.json({
       users,
       integrations: integrations.map((i) => ({
+        id: i.id,
         platform: i.platform,
         storeName: i.storeName,
         status: i.status,
+        isReal: i.externalId !== null,
         feePercentage: Number(i.feePercentage),
         lastSyncedAt: i.lastSyncedAt,
       })),

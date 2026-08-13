@@ -8,9 +8,11 @@ const STATE_COOKIE = "ml_oauth_state";
 /**
  * app/api/marketplace/mercadolivre/callback/route.ts — Passo 2 do OAuth do
  * Mercado Livre: recebe o `code`, valida o `state` (anti-CSRF), troca o
- * código por tokens reais e salva em PlatformIntegration. Esta URL exata é
- * a cadastrada como "redirect_uri" no app do Mercado Livre — não renomear
- * nem mover sem atualizar lá e no .env (MERCADOLIVRE_REDIRECT_URI) também.
+ * código por tokens reais e salva como uma Store (uma linha por conta —
+ * conectar uma conta ML diferente cria uma loja nova, reconectar a mesma
+ * conta só atualiza o token). Esta URL exata é a cadastrada como
+ * "redirect_uri" no app do Mercado Livre — não renomear nem mover sem
+ * atualizar lá e no .env (MERCADOLIVRE_REDIRECT_URI) também.
  */
 
 /** Resolve a origem pública (proto+host) a partir dos headers de proxy, para não
@@ -48,11 +50,13 @@ export async function GET(req: NextRequest) {
   try {
     const tokens = await exchangeCodeForTokens(code);
     const me = await fetchMe(tokens.accessToken);
+    const externalId = String(tokens.userId);
 
-    await prisma.platformIntegration.upsert({
-      where: { platform: Platform.MERCADO_LIVRE },
+    await prisma.store.upsert({
+      where: { platform_externalId: { platform: Platform.MERCADO_LIVRE, externalId } },
       create: {
         platform: Platform.MERCADO_LIVRE,
+        externalId,
         storeName: me.nickname,
         status: "CONNECTED",
         feePercentage: 14.5,

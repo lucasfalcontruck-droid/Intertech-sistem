@@ -4,11 +4,27 @@
  */
 import { REPORTING_WINDOW_DAYS } from "@/lib/constants";
 
-/** Meia-noite (00:00:00.000) do dia da data informada. */
+/** Fuso horário do negócio (Brasília, sem horário de verão desde 2019) — fixo,
+ * não depende do fuso do processo Node, que em produção normalmente roda em UTC. */
+const APP_TIMEZONE = "America/Sao_Paulo";
+
+/**
+ * Meia-noite (00:00:00.000) do dia da data informada, sempre no fuso de
+ * Brasília. Usar `date.setHours(0,0,0,0)` direto dependeria do fuso do
+ * processo — funciona por acaso numa máquina configurada como Brasília, mas
+ * quebra "hoje"/"esta semana" assim que rodar num servidor em UTC.
+ */
 export function startOfDay(date: Date): Date {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-  return d;
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: APP_TIMEZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+  const y = parts.find((p) => p.type === "year")!.value;
+  const m = parts.find((p) => p.type === "month")!.value;
+  const d = parts.find((p) => p.type === "day")!.value;
+  return new Date(`${y}-${m}-${d}T00:00:00-03:00`);
 }
 
 /** Retorna a mesma data `days` dias antes. */

@@ -15,9 +15,12 @@ export interface MercadoLivreTestResult {
   recentOrders: { id: number; status: string; total: number; date: string }[];
 }
 
-/** Testa a conexão real com o Mercado Livre e retorna conta + pedidos recentes de verdade. */
+/** Testa a conexão real de uma loja do Mercado Livre e retorna conta + pedidos recentes de verdade. */
 export function useTestMercadoLivre() {
   return useMutation({
-    mutationFn: () => apiFetch<MercadoLivreTestResult>("/api/marketplace/mercadolivre/test"),
+    mutationFn: (storeId: string) =>
+      apiFetch<MercadoLivreTestResult>(
+        `/api/marketplace/mercadolivre/test?storeId=${encodeURIComponent(storeId)}`,
+      ),
   });
 }

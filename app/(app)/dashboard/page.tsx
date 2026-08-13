@@ -1,20 +1,17 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useDashboard } from "@/hooks/dashboard/use-dashboard";
-import { KpiCard } from "@/components/ui/kpi-card";
+import { useMarketplace } from "@/hooks/marketplace/use-marketplace";
+import { useAllStoresDailyStats } from "@/hooks/marketplace/use-store-stats";
+import { HeroMetric, KpiRow } from "@/components/ui/hero-metric";
 import { Card, CardHeader, LinkButton } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge, type BadgeVariant } from "@/components/ui/badge";
 import { PlatformChip } from "@/components/ui/platform-chip";
-import {
-  IconRevenue,
-  IconCart,
-  IconTicket,
-  IconAlertTriangle,
-  IconExport,
-  IconBoxTop,
-} from "@/components/ui/icons";
+import { StoreStatsCard } from "@/components/marketplace/store-stats-card";
+import { IconExport } from "@/components/ui/icons";
 import { PlatformBarChart } from "@/components/charts/platform-bar-chart";
 import { PlatformDonutChart } from "@/components/charts/platform-donut-chart";
 import { SalesLineChart } from "@/components/charts/sales-line-chart";
@@ -32,17 +29,26 @@ const ORDER_STATUS_BADGE: Record<OrderStatus, { variant: BadgeVariant; label: st
 };
 
 export default function DashboardPage() {
-  const { data, isLoading, isError, error } = useDashboard();
+  const [storeId, setStoreId] = useState("");
+  const { data, isLoading, isError, error } = useDashboard(storeId || undefined);
+  const { data: marketplaceData } = useMarketplace();
+  const { data: storeStatsData } = useAllStoresDailyStats();
 
   return (
     <div>
-      <div className="mb-5 flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-bold text-ink">Visão Geral</h2>
-          <p className="mt-1 text-[12.5px] text-ink-secondary">
-            Resumo consolidado de vendas, estoque e financeiro
-          </p>
-        </div>
+      <div className="mb-5 flex items-center justify-between gap-2.5">
+        <select
+          value={storeId}
+          onChange={(e) => setStoreId(e.target.value)}
+          className="rounded-[10px] border border-border bg-card px-3 py-2.5 text-[12.5px] text-ink outline-none"
+        >
+          <option value="">Todas as lojas</option>
+          {marketplaceData?.integrationCards.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.storeName} · {PLATFORM_LABEL[s.platform]}
+            </option>
+          ))}
+        </select>
         <div className="flex gap-2.5">
           <Button variant="secondary">Período: 30 dias</Button>
           <Button variant="primary">
@@ -57,40 +63,50 @@ export default function DashboardPage() {
 
       {data && (
         <>
-          <div className="mb-5 grid grid-cols-4 gap-4">
-            <KpiCard
-              icon={<IconRevenue className="h-[19px] w-[19px]" />}
-              value={formatCurrency(data.kpis.salesToday)}
-              label="Vendas hoje (todas as plataformas)"
-              trend={{
-                direction: data.kpis.salesTrend >= 0 ? "up" : "down",
-                label: formatPercent(Math.abs(data.kpis.salesTrend)),
-              }}
-            />
-            <KpiCard
-              icon={<IconCart className="h-[19px] w-[19px]" />}
-              value={formatNumber(data.kpis.ordersToday)}
-              label="Pedidos hoje"
-              trend={{
-                direction: data.kpis.ordersTrend >= 0 ? "up" : "down",
-                label: formatPercent(Math.abs(data.kpis.ordersTrend)),
-              }}
-            />
-            <KpiCard
-              icon={<IconTicket className="h-[19px] w-[19px]" />}
-              value={formatCurrency(data.kpis.avgTicketToday)}
-              label="Ticket médio"
-              trend={{
-                direction: data.kpis.avgTicketTrend >= 0 ? "up" : "down",
-                label: formatPercent(Math.abs(data.kpis.avgTicketTrend)),
-              }}
-            />
-            <KpiCard
-              icon={<IconAlertTriangle className="h-[19px] w-[19px]" />}
-              value={`${data.kpis.lowStockCount} SKUs`}
-              label="Com estoque baixo"
-            />
-          </div>
+          <HeroMetric
+            label="Vendas hoje · todas as plataformas"
+            value={formatCurrency(data.kpis.salesToday)}
+            trend={{
+              direction: data.kpis.salesTrend >= 0 ? "up" : "down",
+              label: `${formatPercent(Math.abs(data.kpis.salesTrend))} vs. média diária`,
+            }}
+          />
+          <KpiRow
+            items={[
+              {
+                label: "Pedidos hoje",
+                value: formatNumber(data.kpis.ordersToday),
+                trend: {
+                  direction: data.kpis.ordersTrend >= 0 ? "up" : "down",
+                  label: formatPercent(Math.abs(data.kpis.ordersTrend)),
+                },
+              },
+              {
+                label: "Ticket médio",
+                value: formatCurrency(data.kpis.avgTicketToday),
+                trend: {
+                  direction: data.kpis.avgTicketTrend >= 0 ? "up" : "down",
+                  label: formatPercent(Math.abs(data.kpis.avgTicketTrend)),
+                },
+              },
+              {
+                label: "Estoque baixo",
+                value: `${data.kpis.lowStockCount} SKUs`,
+                flag: data.kpis.lowStockCount > 0 ? "necessita ação" : undefined,
+              },
+            ]}
+          />
+
+          {storeStatsData && storeStatsData.stats.length > 0 && (
+            <div className="mb-4">
+              <p className="mb-2.5 text-[13px] font-bold text-ink">Detalhamento por loja · hoje</p>
+              <div className="grid grid-cols-2 gap-4">
+                {storeStatsData.stats.map((s) => (
+                  <StoreStatsCard key={s.storeId} stats={s} />
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="mb-4 grid grid-cols-[1.4fr_1fr] gap-4">
             <Card>
@@ -159,14 +175,9 @@ export default function DashboardPage() {
                   {data.lowStockProducts.map((p) => (
                     <tr key={p.id} className="border-b border-white/4 last:border-none">
                       <td className="py-3">
-                        <div className="flex items-center gap-2.5">
-                          <div className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-lg border border-border bg-card-2 text-ink-muted">
-                            <IconBoxTop className="h-4 w-4" />
-                          </div>
-                          <div>
-                            <div className="text-sm font-semibold text-ink">{p.name}</div>
-                            <div className="text-[11px] text-ink-muted">{p.sku}</div>
-                          </div>
+                        <div>
+                          <div className="text-sm font-semibold text-ink">{p.name}</div>
+                          <div className="text-[11px] text-ink-muted">{p.sku}</div>
                         </div>
                       </td>
                       <td className="py-3 text-right">

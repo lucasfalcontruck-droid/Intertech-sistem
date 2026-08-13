@@ -19,16 +19,18 @@ export interface OrderRow {
 export interface OrderFilters {
   search?: string;
   platform?: string;
+  storeId?: string;
   status?: string;
   dateFrom?: string;
   dateTo?: string;
 }
 
-/** Lista pedidos de venda com filtros de busca, plataforma, status e período. */
+/** Lista pedidos de venda com filtros de busca, plataforma, loja, status e período. */
 export function usePedidos(filters: OrderFilters) {
   const params = new URLSearchParams();
   if (filters.search) params.set("search", filters.search);
   if (filters.platform) params.set("platform", filters.platform);
+  if (filters.storeId) params.set("storeId", filters.storeId);
   if (filters.status) params.set("status", filters.status);
   if (filters.dateFrom) params.set("dateFrom", filters.dateFrom);
   if (filters.dateTo) params.set("dateTo", filters.dateTo);

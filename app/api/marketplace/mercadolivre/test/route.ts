@@ -1,17 +1,23 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getValidMercadoLivreCredentials } from "@/lib/marketplace/mercadolivre-auth";
 import { fetchMe, fetchRecentOrders } from "@/lib/marketplace/mercadolivre-client";
 
 /**
  * app/api/marketplace/mercadolivre/test/route.ts — Botão "Testar conexão
- * real": chama a API ao vivo do Mercado Livre (não o banco local) para
- * confirmar que o token salvo funciona, mostrando conta e pedidos reais.
+ * real" de uma loja ML específica: chama a API ao vivo do Mercado Livre
+ * (não o banco local) para confirmar que o token salvo funciona, mostrando
+ * conta e pedidos reais.
  */
 
-/** Testa a conexão real com o Mercado Livre. */
-export async function GET() {
+/** Testa a conexão real de uma loja do Mercado Livre (?storeId=...). */
+export async function GET(req: NextRequest) {
+  const storeId = req.nextUrl.searchParams.get("storeId");
+  if (!storeId) {
+    return NextResponse.json({ connected: false, error: "storeId é obrigatório." }, { status: 400 });
+  }
+
   try {
-    const creds = await getValidMercadoLivreCredentials();
+    const creds = await getValidMercadoLivreCredentials(storeId);
     const [me, orders] = await Promise.all([
       fetchMe(creds.accessToken),
       fetchRecentOrders(creds.accessToken, creds.userId, 5),
