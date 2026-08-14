@@ -611,13 +611,33 @@ async function main() {
   console.log("Criando usuários...");
   const passwordHash = await bcrypt.hash("intertech123", 10);
 
-  await prisma.user.create({
-    data: {
-      name: "Lucas Falcon",
-      email: "admin@intertech.com",
-      passwordHash,
-      role: "Administrador",
-    },
+  const SELLER_ACCOUNTS = [
+    { name: "JAMERSON VICTOR", email: "jamerson@intertech.com", seller: "JAMERSON VICTOR" },
+    { name: "FERNANDO", email: "fernando@intertech.com", seller: "FERNANDO" },
+    { name: "THAIZE", email: "thaize@intertech.com", seller: "THAIZE" },
+    { name: "PATRICIA", email: "patricia@intertech.com", seller: "PATRICIA" },
+    { name: "GABRIEL WILLIAN", email: "gabriel@intertech.com", seller: "GABRIEL WILLIAN" },
+    { name: "MARCO AURÉLIO PETINATTI", email: "marco@intertech.com", seller: "MARCO AURÉLIO PETINATTI" },
+  ] as const;
+
+  await prisma.user.createMany({
+    data: [
+      {
+        name: "Lucas Falcon",
+        email: "admin@intertech.com",
+        passwordHash,
+        role: "ADMIN",
+        seller: null,
+      },
+      ...SELLER_ACCOUNTS.map((account) => ({
+        name: account.name,
+        email: account.email,
+        passwordHash,
+        role: "VENDEDOR",
+        seller: account.seller,
+      })),
+    ],
+    skipDuplicates: true,
   });
 
   console.log("Criando lojas conectadas (uma ou mais por plataforma)...");

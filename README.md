@@ -79,7 +79,7 @@ npx prisma migrate dev
 npm run db:seed
 ```
 
-Isso cria o usuário administrador de demonstração (tabela abaixo), as 3 integrações de marketplace, ~34 produtos (incluindo os itens com estoque baixo/esgotado usados como referência), ~4.400 pedidos distribuídos nos últimos 30 dias (com os totais mensais de Mercado Livre/Shopee/TikTok Shop batendo com os valores de referência) e os lançamentos financeiros (contas a receber/pagar, DRE, histórico de 6 meses de fluxo de caixa).
+Isso cria as contas de usuário (tabela abaixo), as 3 integrações de marketplace, ~34 produtos (incluindo os itens com estoque baixo/esgotado usados como referência), ~4.400 pedidos distribuídos nos últimos 30 dias (com os totais mensais de Mercado Livre/Shopee/TikTok Shop batendo com os valores de referência) e os lançamentos financeiros (contas a receber/pagar, DRE, histórico de 6 meses de fluxo de caixa).
 
 ### 6. Iniciar o projeto
 
@@ -89,11 +89,19 @@ npm run dev
 
 Acesse [http://localhost:3000](http://localhost:3000) — você será redirecionado para o login.
 
-**Login de demonstração:**
+**Contas de demonstração** (senha padrão `intertech123` para todas):
 
-| E-mail                | Senha           |
-| ---------------------- | --------------- |
-| `admin@intertech.com` | `intertech123`  |
+| E-mail                  | Cargo      | Vendedor vinculado       |
+| ------------------------ | ---------- | ------------------------ |
+| `admin@intertech.com`    | Admin      | —                        |
+| `jamerson@intertech.com` | Vendedor   | JAMERSON VICTOR          |
+| `fernando@intertech.com` | Vendedor   | FERNANDO                 |
+| `thaize@intertech.com`   | Vendedor   | THAIZE                   |
+| `patricia@intertech.com` | Vendedor   | PATRICIA                 |
+| `gabriel@intertech.com`  | Vendedor   | GABRIEL WILLIAN          |
+| `marco@intertech.com`    | Vendedor   | MARCO AURÉLIO PETINATTI  |
+
+Troque as senhas padrão antes do uso real.
 
 ## Scripts disponíveis
 
@@ -115,6 +123,7 @@ Acesse [http://localhost:3000](http://localhost:3000) — você será redirecion
 - **Estoque:** KPIs, filtros, CRUD completo de produtos (criar/editar/excluir/ajustar estoque) e giro de estoque por categoria.
 - **Financeiro:** KPIs, fluxo de caixa (6 meses), contas a receber/pagar com CRUD e "marcar como pago", e DRE simplificado calculado a partir dos lançamentos.
 - **Pedidos / Configurações / Relatórios:** módulos complementares (listagem de pedidos com filtros, dados da empresa/usuários/integrações, e um placeholder para relatórios avançados).
+- **Configurações → contas:** o administrador cria contas de vendedores/operadores; elas são a **fonte única** para o app do Vendedor de Rua, que mantém cópias locais para login offline (`app/api/integrations/vendedor/users/...`, autenticadas por chave).
 
 ## Camada de integração com marketplaces
 

@@ -1,10 +1,16 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { isValidVendedorApiKey } from "@/lib/integrations/vendedor-auth";
 
-/** app/api/configuracoes/route.ts — Área Configurações: usuários do sistema e status das integrações. */
+/**
+ * app/api/integrations/vendedor/users/route.ts — Sincronização de contas com o
+ * app do Vendedor de Rua. O sistema principal é a fonte única das contas; o app
+ * puxa a lista (GET) para manter cópias locais (login offline) e envia novos
+ * usuários criados pelo admin no app (POST). Autenticada por chave fixa
+ * (x-vendedor-api-key), igual às outras rotas de integração.
+ */
 
 const userInputSchema = z.object({
   name: z.string().min(2),
@@ -14,58 +20,43 @@ const userInputSchema = z.object({
   seller: z.string().nullable().optional(),
 });
 
-const USER_SELECT = {
+/** Campos enviados ao app: o passwordHash (bcrypt) permite o login offline local. */
+const SYNC_SELECT = {
   id: true,
   name: true,
   email: true,
   role: true,
   seller: true,
-  createdAt: true,
+  passwordHash: true,
+  updatedAt: true,
 } as const;
 
-/** Retorna usuários cadastrados e o status de cada integração de marketplace. */
-export async function GET() {
-  try {
-    const [users, integrations] = await Promise.all([
-      prisma.user.findMany({
-        select: USER_SELECT,
-        orderBy: { createdAt: "asc" },
-      }),
-      prisma.store.findMany({ orderBy: [{ platform: "asc" }, { createdAt: "asc" }] }),
-    ]);
+export async function GET(req: NextRequest) {
+  if (!isValidVendedorApiKey(req)) {
+    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+  }
 
-    return NextResponse.json({
-      users,
-      integrations: integrations.map((i) => ({
-        id: i.id,
-        platform: i.platform,
-        storeName: i.storeName,
-        status: i.status,
-        isReal: i.externalId !== null,
-        feePercentage: Number(i.feePercentage),
-        lastSyncedAt: i.lastSyncedAt,
-      })),
+  try {
+    const users = await prisma.user.findMany({
+      select: SYNC_SELECT,
+      orderBy: [{ name: "asc" }],
     });
+    return NextResponse.json({ users });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Não foi possível carregar as configurações." },
+      { error: "Não foi possível carregar as contas." },
       { status: 500 },
     );
   }
 }
 
-/** Cria uma nova conta de usuário (somente administrador). */
-export async function POST(request: Request) {
-  const session = await auth();
-  if (session?.user?.role !== "ADMIN") {
-    return NextResponse.json(
-      { error: "Apenas o administrador pode criar contas." },
-      { status: 403 },
-    );
+export async function POST(req: NextRequest) {
+  if (!isValidVendedorApiKey(req)) {
+    return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
   }
 
-  const body = await request.json().catch(() => null);
+  const body = await req.json().catch(() => null);
   const parsed = userInputSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
@@ -93,7 +84,7 @@ export async function POST(request: Request) {
         role: parsed.data.role,
         seller: parsed.data.seller ?? null,
       },
-      select: USER_SELECT,
+      select: SYNC_SELECT,
     });
     return NextResponse.json({ user }, { status: 201 });
   } catch (error) {
